@@ -34,8 +34,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if(isRunning = true)
         {
-            polyline.color='blue';
+            polyline.setStyle({ color: 'blue' });
             polyline.addLatLng([lat, lng]);
+        }
+        else
+        {
+            polyline.setStyle({ color: '#00000000' });
         }
     }
     
@@ -70,8 +74,8 @@ startBtn.addEventListener('click', function handleClick() {
     {
         startBtn.textContent = 'Start';
         startBtn.style.background = "#4CAF50";
-        isRunning = false;
         clearInterval(timerVar);
+        isRunning = false;
     }
 });
 
