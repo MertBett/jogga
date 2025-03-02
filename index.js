@@ -1,11 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    const map = new L.map('map', { zoomControl: false });
+    const map = new L.map('map', { zoomControl: false, attributionControl: true });
     
     // add open street map tile from https://leafletjs.com/index.html
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+
+    map.attributionControl.setPosition('topleft');
     
     let marker;
     /* this puts a blue dot immediately, might be better making it transparent and then become blue when is running? */
