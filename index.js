@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     var marker;
     var polyline = L.polyline([], {color: 'blue'}).addTo(map);
+    var newVisit = true;
     
     // updating user location and line showing movement
     function updateLocation(position) {
@@ -21,9 +22,15 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             marker.setLatLng([lat, lng]);
         }
-        
 
-        //map.setView([lat, lng], 19);
+        // don't want it snapping you back to your position all the time because then you can't move the map around and plan where you're going
+        // so only do it when you initially enter the page.
+        // possibly add a button to snap you back so if you scroll too far and get lost you can get moved back
+        if (newVisit) {
+            map.setView([lat, lng], 19);
+            newVisit = false;
+        }
+
         polyline.addLatLng([lat, lng]);
     }
     
