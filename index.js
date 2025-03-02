@@ -10,8 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     map.attributionControl.setPosition('topleft');
     
     let marker;
-    /* this puts a blue dot immediately, might be better making it transparent and then become blue when is running? */
-    const polyline = L.polyline([], {color: 'blue'}).addTo(map);
+    let polyline = L.polyline([], {color: '#00000000'}).addTo(map);
     let newVisit = true;
     
     // updating user location and line showing movement
@@ -36,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if(isRunning = true)
         {
             polyline.addLatLng([lat, lng]);
+            polyline.color='blue';
         }
     }
     
