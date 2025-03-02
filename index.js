@@ -22,7 +22,8 @@ document.addEventListener("DOMContentLoaded", function () {
             marker.setLatLng([lat, lng]);
         }
         
-        map.setView([lat, lng], 19);
+
+        //map.setView([lat, lng], 19);
         polyline.addLatLng([lat, lng]);
     }
     
@@ -35,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(updateLocation, locationError, {
             enableHighAccuracy: true,
-            timeout: 1000,
+            timeout: 1500,
             maximumAge: 0
         });
     } else {
