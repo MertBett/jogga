@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
             newVisit = false;
         }
 
-        if(isRunning = true)
+        if(isRunning == true)
         {
             polyline.setStyle({ color: 'blue' });
             polyline.addLatLng([lat, lng]);
