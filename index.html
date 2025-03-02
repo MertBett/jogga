@@ -1,39 +1,53 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <meta name="theme-color" content="#4285f4">
+
   <title>Jogga</title>
+  
+  <link rel="stylesheet" href="index.css">
   <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
   <link rel="manifest" href="/jogga/manifest.json">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
 </head>
 <body>
-
-  <div id="map" style="height: 85%;"></div>
   
-  <style>
+  <div class="statsDropdown">
+    <div id="timer"></div>
+  </div>
 
-    html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-        }
-  
-  </style>
+  <div id="map"></div>
+
+  <nav class="bottom-nav">
+    
+    <a href="/settings" class="nav-item">Settings</a>
+
+    <div class="start-wrapper">
+      <button id="start-button" class="nav-item start-button">Start</div></button>
+    </div>
+
+    <a href="/history" class="nav-item">History</a>
+
+  </nav>
 
   <script>
-    // Register the service worker
+    // register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/jogga/service-worker.js')
         .then(reg => console.log('Service worker registered'))
         .catch(err => console.log('Service worker registration failed', err));
     }
   </script>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="index.js"></script>
+
 </body>
 </html>
