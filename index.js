@@ -34,8 +34,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if(isRunning = true)
         {
-            polyline.addLatLng([lat, lng]);
             polyline.color='blue';
+            polyline.addLatLng([lat, lng]);
         }
     }
     
