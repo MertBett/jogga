@@ -70,6 +70,7 @@ startBtn.addEventListener('click', function handleClick() {
     {
         startBtn.textContent = 'Start';
         startBtn.style.background = "#4CAF50";
+        isRunning = false;
         clearInterval(timerVar);
     }
 });
