@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     map.attributionControl.setPosition('topleft');
     
     let marker;
-    let polyline = L.polyline([], {color: '#00000000'}).addTo(map);
+    let polyline;
     let newVisit = true;
     
     // updating user location and line showing movement
@@ -32,14 +32,15 @@ document.addEventListener("DOMContentLoaded", function () {
             newVisit = false;
         }
 
+        // my hope is this draws essentially separate polylines but I think it might just join the two if you were to go for a bit, stop for a bit, 
+        // then go again from somewhere else, like continuing after a rest
         if(isRunning == true)
         {
-            polyline.setStyle({ color: 'blue' });
+            if(!polyline)
+            {
+                polyline = L.polyline([], {color: 'blue', smoothFactor: 2}).addTo(map)
+            }
             polyline.addLatLng([lat, lng]);
-        }
-        else
-        {
-            polyline.setStyle({ color: '#00000000' });
         }
     }
     
