@@ -42,6 +42,11 @@ document.addEventListener("DOMContentLoaded", function () {
             currentPolyline.addLatLng([lat, lng]);
         }
     }
+
+    function locationError(error) 
+    {
+        console.error("Error finding location", error);
+    }
     
     // get user location
     if (navigator.geolocation) 
