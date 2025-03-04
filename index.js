@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let previousLng = null;
     let totalDistance = 0;
     let previousTime = null;
+    let paceHistory = [];
     
     // updating user location and line showing movement
     function updateLocation(position) {
@@ -51,22 +52,44 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if(previousLat && previousLng)
             {
-                let pace
+                let pace;
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
                 totalDistance+=distanceBetweenCoords;
-                let timeElapsed = (currentTime - previousTime)/1000 // time is in milliseconds so convert to seconds
+                let timeElapsed = (currentTime - previousTime)/1000; // time is in milliseconds so convert to seconds
                 if(distanceBetweenCoords > 0.0001)
                 {
-                    pace = timeElapsed / distanceBetweenCoords // this is seconds per km now
+                    pace = timeElapsed / distanceBetweenCoords; // this is seconds per km now
+                    // get rid of crazy paces because they are gps issues, I think I'll try and smooth the noise 
+                    // eventually earlier than this and chuck any that suddenly jolt but need some research to see
+                    // what is acceptable and not etc, this does for now I think
+                    if(pace > 120 || pace < 1500)
+                    {
+                        paceHistory.push(pace);
+                    }
                 }
-                // case where person hasn't moved so doesnt divide by zero above
-                else
+                let avgPace;
+                if(paceHistory.length == 15)
                 {
-                    pace = 0;
+                    // https://stackoverflow.com/questions/29544371/finding-the-average-of-an-array-using-js
+                    avgPace = paceHistory => paceHistory.reduce((a, b) => a + b) / paceHistory.length;
+                    if(avgPace==0)
+                    {
+                        document.getElementById("pace").innerHTML = "∞/km";
+                    }
+                    else
+                    {
+                        document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
+                    }
+                    // this makes it so it then averages the next 15 otherwise it would update every time a gps location is received
+                    paceHistory = [];
                 }
-                document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km"
-                document.getElementById("pace").innerHTML = getMinAndSec(pace) + "/km"
+                // dont have 15 gps entries yet so 
+                elseif(paceHistory.length == 0)
+                {
+                    document.getElementById("pace").innerHTML = "--:--";
+                }
             }
+            document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
             previousLat = newLat;
             previousLng = newLng;
             previousTime = currentTime;
@@ -81,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // https://www.programmingbasic.com/convert-seconds-to-minutes-and-seconds-javascript
     function getMinAndSec(seconds){
         const min = Math.floor(seconds / 60);
-        const secs = seconds%60;
+        const secs = Math.floor(seconds % 60);
         return min.toString().padStart(2, '0')+":"+secs.toString().padStart(2, '0');
     }
 
