@@ -13,33 +13,44 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentPolyline;
     let newVisit = true;
     let isRunning = false;
+    let previousLat = null;
+    let previousLng = null;
+    let totalDistance = 0;
     
     // updating user location and line showing movement
     function updateLocation(position) {
 
-        let lat = position.coords.latitude;
-        let lng = position.coords.longitude;
+        let newLat = position.coords.latitude;
+        let newLng = position.coords.longitude;
       
         if (!marker) 
         {
-            marker = L.marker([lat, lng]).addTo(map);
+            marker = L.marker([newLat, newLng]).addTo(map);
         } 
         else 
         {
-            marker.setLatLng([lat, lng]);
+            marker.setLatLng([newLat, newLng]);
         }
       
         // don't want it snapping you back to your position all the time because then you can't move the map around and plan where you're going
         // so only do it when you initially enter the page.
         if (newVisit) 
         {
-            map.setView([lat, lng], 19);
+            map.setView([newLat, newLng], 19);
             newVisit = false;
         }
         // if running then draw line
         if (isRunning) 
         {
-            currentPolyline.addLatLng([lat, lng]);
+            currentPolyline.addLatLng([newLat, newLng]);
+            if(previousLat && previousLng)
+            {
+                let distanceBetweenCoords = distance(previousLat,previousLong, lat, lng);
+                totalDistance+=distanceBetweenCoords;
+                document.getElementById("distance").innerHTML = `Distance: ${totalDistance.toFixed(2)} km`;
+            }
+            previousLat = newLat;
+            previousLng = newLng;
         }
     }
 
@@ -53,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         navigator.geolocation.watchPosition(updateLocation, locationError, {
         enableHighAccuracy: true,
-        timeout: 1500,
+        timeout: 1000,
         maximumAge: 0
         });
     } 
@@ -81,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Handle start/stop button
     const startBtn = document.getElementById('start-button');
+
     startBtn.addEventListener('click', function handleClick() {
         if (!isRunning) 
         {
@@ -102,4 +114,17 @@ document.addEventListener("DOMContentLoaded", function () {
             currentPolyline = null;
         }
     });
-  });
+
+    // https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
+    function distance(lat1, lon1, lat2, lon2) {
+        const r = 6371; // km
+        const p = Math.PI / 180;
+      
+        const a = 0.5 - Math.cos((lat2 - lat1) * p) / 2
+                      + Math.cos(lat1 * p) * Math.cos(lat2 * p) *
+                        (1 - Math.cos((lon2 - lon1) * p)) / 2;
+      
+        return 2 * r * Math.asin(Math.sqrt(a));
+    }
+
+});
