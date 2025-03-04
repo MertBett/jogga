@@ -51,17 +51,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if(previousLat && previousLng)
             {
+                let pace
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
                 totalDistance+=distanceBetweenCoords;
                 let timeElapsed = (currentTime - previousTime)/1000 // time is in milliseconds so convert to seconds
                 if(distanceBetweenCoords > 0.0001)
                 {
-                    let pace = timeElapsed / (60 * distanceBetweenCoords) // mins per km so *60
+                    pace = timeElapsed / distanceBetweenCoords // this is seconds per km now
                 }
                 // case where person hasn't moved so doesnt divide by zero above
                 else
                 {
-                    let pace = 0;
+                    pace = 0;
                 }
                 document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km"
                 document.getElementById("pace").innerHTML = getMinAndSec(pace) + "/km"
