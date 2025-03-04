@@ -16,12 +16,14 @@ document.addEventListener("DOMContentLoaded", function () {
     let previousLat = null;
     let previousLng = null;
     let totalDistance = 0;
+    let previousTime = null;
     
     // updating user location and line showing movement
     function updateLocation(position) {
 
         let newLat = position.coords.latitude;
         let newLng = position.coords.longitude;
+        let currentTime = new Date().getTime();
       
         if (!marker) 
         {
@@ -43,14 +45,30 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
+            if(previousTime == null)
+            {
+                previousTime = currentTime;
+            }
             if(previousLat && previousLng)
             {
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
                 totalDistance+=distanceBetweenCoords;
-                document.getElementById("distance").innerHTML = "Distance " + totalDistance.toFixed(2) + " km"
+                let timeElapsed = (currentTime - previousTime)/1000 // time is in milliseconds so convert to seconds
+                if(distanceBetweenCoords > 0.0001)
+                {
+                    let pace = timeElapsed / (60 * distanceBetweenCoords) // mins per km so *60
+                }
+                // case where person hasn't moved so doesnt divide by zero above
+                else
+                {
+                    let pace = 0;
+                }
+                document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km"
+                document.getElementById("pace").innerHTML = getMinAndSec(pace) + "/km"
             }
             previousLat = newLat;
             previousLng = newLng;
+            previousTime = currentTime;
         }
     }
 
@@ -59,6 +77,13 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Error finding location", error);
     }
     
+    // https://www.programmingbasic.com/convert-seconds-to-minutes-and-seconds-javascript
+    function getMinAndSec(seconds){
+        const min = Math.floor(seconds / 60);
+        const secs = seconds%60;
+        return min.toString().padStart(2, '0')+":"+secs.toString().padStart(2, '0');
+    }
+
     // get user location
     if (navigator.geolocation) 
     {
@@ -90,13 +115,12 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
     }
     
-    // Handle start/stop button
+    // start/stop button
     const startBtn = document.getElementById('start-button');
 
     startBtn.addEventListener('click', function handleClick() {
         if (!isRunning) 
         {
-            // Start tracking
             startBtn.textContent = 'Stop';
             startBtn.style.background = "red";
             timerVar = setInterval(countTimer, 1000);
@@ -126,5 +150,4 @@ document.addEventListener("DOMContentLoaded", function () {
       
         return 2 * r * Math.asin(Math.sqrt(a));
     }
-
 });
