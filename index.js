@@ -45,9 +45,9 @@ document.addEventListener("DOMContentLoaded", function () {
             currentPolyline.addLatLng([newLat, newLng]);
             if(previousLat && previousLng)
             {
-                let distanceBetweenCoords = distance(previousLat,previousLong, lat, lng);
+                let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
                 totalDistance+=distanceBetweenCoords;
-                document.getElementById("distance").innerHTML = `Distance: ${totalDistance.toFixed(2)} km`;
+                document.getElementById("distance").innerHTML = "Distance " + totalDistance.toFixed(2) + " km"
             }
             previousLat = newLat;
             previousLng = newLng;
