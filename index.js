@@ -117,19 +117,22 @@ document.addEventListener("DOMContentLoaded", function () {
                         currentPace = 0;
                     }
                     paceHistory.push(currentPace);
-                    if (paceHistory.length > 12) 
+                    if (paceHistory.length > 10) 
                     {
                         paceHistory.shift();
                     }
                 
-                    let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
-                    if (avgPace > 0) 
+                    if(paceHistory.length==10)
                     {
-                        document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
-                    }   
-                    else if(avgPace==0)
-                    {
-                        document.getElementById("pace").innerHTML = "∞/km";
+                        let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
+                        if (avgPace > 0) 
+                        {
+                            document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
+                        }   
+                        else if(avgPace==0)
+                        {
+                            document.getElementById("pace").innerHTML = "∞/km";
+                        }
                     }
                     // Im going to blank out speed for first 50-100m until it gets more accurate, 
                     // strava does it so I reckon its alright
@@ -247,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
             isRunning = true;
             // make current polyline a new polyline
             currentPolyline = L.polyline([], {color: 'blue'}).addTo(map);
-            rawPolyline = L.polyline([], {color: 'red'});
+            rawPolyline = L.polyline([], {color: 'red'}).addTo(map);
             // might need to add current coords here because it seems to start after you press start, not when
 
             document.getElementById("pace").innerHTML = "--:--/km";
@@ -262,6 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
             currentPolyline = null;
             rawPolyline = null;
             document.getElementById("pace").innerHTML = "--:--/km";
+            document.getElementById("distance").innerHTML = "0 km";
         }
     });
 
