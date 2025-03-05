@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let totalDistance = 0;
     let previousTime = null;
     let paceHistory = [];
+    let avgPace;
     
     // updating user location and line showing movement
     function updateLocation(position) {
@@ -50,11 +51,12 @@ document.addEventListener("DOMContentLoaded", function () {
             {
                 previousTime = currentTime;
             }
-            if(previousLat && previousLng)
+            if(previousLat != null && previousLng != null)
             {
                 let pace;
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
                 totalDistance+=distanceBetweenCoords;
+                document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
                 let timeElapsed = (currentTime - previousTime)/1000; // time is in milliseconds so convert to seconds
                 if(distanceBetweenCoords > 0.0001)
                 {
@@ -62,16 +64,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     // get rid of crazy paces because they are gps issues, I think I'll try and smooth the noise 
                     // eventually earlier than this and chuck any that suddenly jolt but need some research to see
                     // what is acceptable and not etc, this does for now I think
-                    if(pace > 120 || pace < 1500)
+                    if(pace > 120 && pace < 1500)
                     {
                         paceHistory.push(pace);
                     }
                 }
-                let avgPace;
                 if(paceHistory.length == 15)
                 {
                     // https://stackoverflow.com/questions/29544371/finding-the-average-of-an-array-using-js
-                    avgPace = paceHistory => paceHistory.reduce((a, b) => a + b) / paceHistory.length;
+                    avgPace = paceHistory.reduce((a, b) => a + b) / paceHistory.length;
                     if(avgPace==0)
                     {
                         document.getElementById("pace").innerHTML = "∞/km";
@@ -84,12 +85,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     paceHistory = [];
                 }
                 // dont have 15 gps entries yet so 
-                elseif(paceHistory.length == 0)
+                else if(paceHistory.length == 0)
                 {
-                    document.getElementById("pace").innerHTML = "--:--";
+                    document.getElementById("pace").innerHTML = "--:--/km";
                 }
             }
-            document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
             previousLat = newLat;
             previousLng = newLng;
             previousTime = currentTime;
@@ -103,8 +103,9 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // https://www.programmingbasic.com/convert-seconds-to-minutes-and-seconds-javascript
     function getMinAndSec(seconds){
-        const min = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
+        seconds = Math.round(seconds);
+        const min = Math.floor(seconds/60);
+        const secs = seconds % 60;
         return min.toString().padStart(2, '0')+":"+secs.toString().padStart(2, '0');
     }
 
