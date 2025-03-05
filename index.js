@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 totalDistance+=distanceBetweenCoords;
                 document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
                 let timeElapsed = (currentTime - previousTime)/1000; // time is in milliseconds so convert to seconds
-                if(distanceBetweenCoords > 0.0001)
+                if(distanceBetweenCoords > 0.0003)
                 {
                     pace = timeElapsed / distanceBetweenCoords; // this is seconds per km now
                     // get rid of crazy paces because they are gps issues, I think I'll try and smooth the noise 
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         navigator.geolocation.watchPosition(updateLocation, locationError, {
         enableHighAccuracy: true,
-        timeout: 1500,
+        timeout: 1500;
         maximumAge: 0
         });
     } 
