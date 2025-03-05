@@ -2,7 +2,7 @@
 
 class GPSKalmanFilter 
 {
-    constructor (decay = 2.9) 
+    constructor (decay = 3.05) 
     {
       this.decay = decay
       this.variance = -1
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     previousTime = currentTime;
                 }
 
-                if (speed !== null && speed !== undefined) 
+                if (speed != null && speed != undefined) 
                 {
                     let currentPace;
                     if(speed > 0)
@@ -114,8 +114,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     {
                         currentPace = 0;
                     }
-                    paceHistory.push(currentPace);             
-                    if(paceHistory.length==14 && totalDistance > 0.09)
+                    paceHistory.push(currentPace);
+                    if(paceHistory.length > 14)
+                    {
+                        paceHistory.shift();
+                    }
+                    if(paceHistory.length==14 && totalDistance > 0.08)
                     {
                         let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
                         if (avgPace > 0) 
