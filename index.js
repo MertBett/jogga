@@ -1,13 +1,44 @@
+// https://stackoverflow.com/questions/1134579/smooth-gps-data
+
+class GPSKalmanFilter 
+{
+    constructor (decay = 3) 
+    {
+      this.decay = decay
+      this.variance = -1
+      this.minAccuracy = 1
+    }
+  
+    process (lat, lng, accuracy, timestampInMs) {
+      if (accuracy < this.minAccuracy) accuracy = this.minAccuracy
+  
+      if (this.variance < 0) {
+        this.timestampInMs = timestampInMs
+        this.lat = lat
+        this.lng = lng
+        this.variance = accuracy * accuracy
+      } else {
+        const timeIncMs = timestampInMs - this.timestampInMs
+  
+        if (timeIncMs > 0) {
+          this.variance += (timeIncMs * this.decay * this.decay) / 1000
+          this.timestampInMs = timestampInMs
+        }
+  
+        const _k = this.variance / (this.variance + (accuracy * accuracy))
+        this.lat += _k * (lat - this.lat)
+        this.lng += _k * (lng - this.lng)
+  
+        this.variance = (1 - _k) * this.variance
+      }
+  
+      return [this.lng, this.lat]
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
-    // https://github.com/piercus/kalman-filter?tab=readme-ov-file
-    const { KalmanFilter } = kalmanFilter;
-
-    const kFilter = new KalmanFilter({
-        observation: 2,
-        dynamic: 'constant-speed'
-    });
-
+    const kalmanFilter = new GPSKalmanFilter();
     const map = new L.map('map', { zoomControl: false, attributionControl: true });
 
     // add open street map tile from https://leafletjs.com/index.html
@@ -29,23 +60,21 @@ document.addEventListener("DOMContentLoaded", function () {
     let paceHistory = [];
     let avgPace = null;
     
-    
     // updating user location and line showing movement
     function updateLocation(position) {
-        
+
         let rawLat = position.coords.latitude;
         let rawLng = position.coords.longitude;
+        let accuracy = position.coords.accuracy;
+        let timestamp = position.timestamp;
+
+        const [newLng, newLat] = kalmanFilter.process(rawLat, rawLng, accuracy, timestamp);
+
         let currentTime = new Date().getTime();
         let speed = position.coords.speed;
-
-        const res = kFilter.filter([rawLat,rawLng]);
-        
-        let newLat = filteredPosition[0];
-        let newLng = filteredPosition[1];
       
         if (!marker) 
         {
-            // gotta make this a better marker, has to be a circle or something
             marker = L.marker([newLat, newLng]).addTo(map);
         } 
         else 
@@ -64,17 +93,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
-            rawPolyline.addLatLng([rawLat,rawLng]);
 
             if(previousLat != null && previousLng != null)
             {
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
                 totalDistance+=distanceBetweenCoords;
                 document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
-                // Im going to blank out speed for first 50-100m until it gets more accurate, 
-                // strava does it so I reckon its alright
-                // I think it will only be the first time but will need tested, may need to be
-                // every time start is pressed
+
                 if(previousTime == null)
                 {
                     previousTime = currentTime;
@@ -106,6 +131,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     {
                         document.getElementById("pace").innerHTML = "∞/km";
                     }
+                    // Im going to blank out speed for first 50-100m until it gets more accurate, 
+                    // strava does it so I reckon its alright
+                    // I think it will only be the first time but will need tested, may need to be
+                    // every time start is pressed
                 }
             }
             // will add an else here if I like the above so when it fails it will use this because the literature seems
@@ -218,8 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
             isRunning = true;
             // make current polyline a new polyline
             currentPolyline = L.polyline([], {color: 'blue'}).addTo(map);
-            rawPolyline = L.polyline([], {color: "red"}).addTo(map);
-
+            rawPolyline = L.polyline([], {color: 'red'});
             // might need to add current coords here because it seems to start after you press start, not when
 
             document.getElementById("pace").innerHTML = "--:--/km";
