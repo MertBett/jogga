@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     pace = 0;
                     paceHistory.push(pace);
                 }
-                if(paceHistory.length == 5)
+                if(paceHistory.length == 8)
                 {
                     // https://stackoverflow.com/questions/29544371/finding-the-average-of-an-array-using-js
                     avgPace = paceHistory.reduce((a, b) => a + b) / paceHistory.length;
@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         navigator.geolocation.watchPosition(updateLocation, locationError, {
         enableHighAccuracy: true,
-        timeout: 1000,
+        timeout: 1500,
         maximumAge: 0
         });
     } 
