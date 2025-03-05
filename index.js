@@ -72,6 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 else
                 {
                     pace = 0;
+                    paceHistory.push(pace);
                 }
                 if(paceHistory.length == 5)
                 {
