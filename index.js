@@ -2,7 +2,7 @@
 
 class GPSKalmanFilter 
 {
-    constructor (decay = 3) 
+    constructor (decay = 2.9) 
     {
       this.decay = decay
       this.variance = -1
@@ -50,18 +50,13 @@ document.addEventListener("DOMContentLoaded", function () {
     
     let marker;
     let currentPolyline;
-    let rawPolyline;
     let newVisit = true;
     let isRunning = false;
     let previousLat = null;
     let previousLng = null;
-    let rawprevlat = null;
-    let rawprevlng = null;
     let totalDistance = 0;
-    let totalrawdist = 0;
     let previousTime = null;
     let paceHistory = [];
-    let avgPace = null;
     
     // updating user location and line showing movement
     function updateLocation(position) {
@@ -96,15 +91,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
-            rawPolyline.addLatLng([rawLat, rawLng]);
 
             if(previousLat != null && previousLng != null)
             {
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
-                let rawdist = distance(rawprevlat,rawprevlng,rawLat,rawLng);
-                totalrawdist+=rawdist;
                 totalDistance+=distanceBetweenCoords;
-                document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + " OR " + totalrawdist.toFixed(2);
+                document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
 
                 if(previousTime == null)
                 {
@@ -122,13 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     {
                         currentPace = 0;
                     }
-                    paceHistory.push(currentPace);
-                    if (paceHistory.length > 10) 
-                    {
-                        paceHistory.shift();
-                    }
-                
-                    if(paceHistory.length==10)
+                    paceHistory.push(currentPace);             
+                    if(paceHistory.length==14 && totalDistance > 0.09)
                     {
                         let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
                         if (avgPace > 0) 
@@ -139,11 +126,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         {
                             document.getElementById("pace").innerHTML = "∞/km";
                         }
+                        for (let i = 0; i < 4; i++) 
+                        {
+                            paceHistory.shift();
+                        }
                     }
-                    // Im going to blank out speed for first 50-100m until it gets more accurate, 
-                    // strava does it so I reckon its alright
-                    // I think it will only be the first time but will need tested, may need to be
-                    // every time start is pressed
                 }
             }
             // will add an else here if I like the above so when it fails it will use this because the literature seems
@@ -196,8 +183,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 */
             previousLat = newLat;
             previousLng = newLng;
-            rawprevlat = rawLat;
-            rawprevlng = rawLng;
             previousTime = currentTime;
         }
     }
@@ -258,7 +243,6 @@ document.addEventListener("DOMContentLoaded", function () {
             isRunning = true;
             // make current polyline a new polyline
             currentPolyline = L.polyline([], {color: 'blue'}).addTo(map);
-            rawPolyline = L.polyline([], {color: 'red'}).addTo(map);
             // might need to add current coords here because it seems to start after you press start, not when
 
             document.getElementById("pace").innerHTML = "--:--/km";
@@ -271,8 +255,8 @@ document.addEventListener("DOMContentLoaded", function () {
             isRunning = false;
             // end the current polyline
             currentPolyline = null;
-            rawPolyline = null;
             document.getElementById("pace").innerHTML = "--:--/km";
+            paceHistory = [];
         }
     });
 
