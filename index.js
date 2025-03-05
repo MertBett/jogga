@@ -64,12 +64,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     // get rid of crazy paces because they are gps issues, I think I'll try and smooth the noise 
                     // eventually earlier than this and chuck any that suddenly jolt but need some research to see
                     // what is acceptable and not etc, this does for now I think
-                    if(pace > 120 && pace < 1500)
+                    if(pace > 140)
                     {
                         paceHistory.push(pace);
                     }
                 }
-                if(paceHistory.length == 15)
+                else
+                {
+                    pace = 0;
+                }
+                if(paceHistory.length == 5)
                 {
                     // https://stackoverflow.com/questions/29544371/finding-the-average-of-an-array-using-js
                     avgPace = paceHistory.reduce((a, b) => a + b) / paceHistory.length;
@@ -81,10 +85,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     {
                         document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
                     }
-                    // this makes it so it then averages the next 15 otherwise it would update every time a gps location is received
+                    // this makes it so it then averages the next n otherwise it would update every time a gps location is received
                     paceHistory = [];
                 }
-                // dont have 15 gps entries yet so 
+                // dont have enough gps entries yet so 
                 else if(paceHistory.length == 0)
                 {
                     document.getElementById("pace").innerHTML = "--:--/km";
@@ -161,6 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
             isRunning = false;
             // end the current polyline
             currentPolyline = null;
+            document.getElementById("pace").innerHTML = "--:--/km";
         }
     });
 
