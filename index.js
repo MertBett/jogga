@@ -48,45 +48,49 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
-            let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
+            
+            if(previousLat != null && previousLng != null)
+            {
+                let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
                 totalDistance+=distanceBetweenCoords;
                 document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
 
-            if(previousTime == null)
-            {
-                previousTime = currentTime;
-            }
-
-            if (speed !== null && speed !== undefined) 
-            {
-                let currentPace;
-                if(speed > 0)
+                if(previousTime == null)
                 {
-                    currentPace = 1000/speed;
+                    previousTime = currentTime;
+                }
+
+                if (speed !== null && speed !== undefined) 
+                {
+                    let currentPace;
+                    if(speed > 0)
+                    {
+                        currentPace = 1000/speed;
+                    }
+                    else
+                    {
+                        currentPace = 0;
+                    }
+                    paceHistory.push(currentPace);
+                    if (paceHistory.length > 12) 
+                    {
+                        paceHistory.shift();
+                    }
+                
+                    let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
+                    if (avgPace > 0) 
+                    {
+                        document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
+                    }    
+                    else if(avgPace==0)
+                    {
+                        document.getElementById("pace").innerHTML = "∞/km";
+                    }
                 }
                 else
                 {
-                    currentPace = 0;
+                    document.getElementById("pace").innerHTML = "speed aint work";
                 }
-                paceHistory.push(currentPace);
-                if (paceHistory.length > 12) 
-                {
-                    paceHistory.shift();
-                }
-                
-                let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
-                if (avgPace > 0) 
-                {
-                    document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
-                } 
-                else if(avgPace==0)
-                {
-                    document.getElementById("pace").innerHTML = "∞/km";
-                }
-            }
-            else
-            {
-                document.getElementById("pace").innerHTML = "speed aint work";
             }
             // will add an else here if I like the above so when it fails it will use this because the literature seems
             // to suggest ios doesn't like the speed reading
