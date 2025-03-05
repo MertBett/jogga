@@ -1,5 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    // https://github.com/piercus/kalman-filter?tab=readme-ov-file
+    const { KalmanFilter } = kalmanFilter;
+
+    const kFilter = new KalmanFilter({
+        observation: 2,
+        dynamic: 'constant-speed'
+    });
+
     const map = new L.map('map', { zoomControl: false, attributionControl: true });
 
     // add open street map tile from https://leafletjs.com/index.html
@@ -11,6 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     let marker;
     let currentPolyline;
+    let rawPolyline;
     let newVisit = true;
     let isRunning = false;
     let previousLat = null;
@@ -20,16 +29,23 @@ document.addEventListener("DOMContentLoaded", function () {
     let paceHistory = [];
     let avgPace = null;
     
+    
     // updating user location and line showing movement
     function updateLocation(position) {
-
-        let newLat = position.coords.latitude;
-        let newLng = position.coords.longitude;
+        
+        let rawLat = position.coords.latitude;
+        let rawLng = position.coords.longitude;
         let currentTime = new Date().getTime();
         let speed = position.coords.speed;
+
+        const res = kFilter.filter([rawLat,rawLng]);
+        
+        let newLat = filteredPosition[0];
+        let newLng = filteredPosition[1];
       
         if (!marker) 
         {
+            // gotta make this a better marker, has to be a circle or something
             marker = L.marker([newLat, newLng]).addTo(map);
         } 
         else 
@@ -48,13 +64,17 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
-            
+            rawPolyline.addLatLng([rawLat,rawLng]);
+
             if(previousLat != null && previousLng != null)
             {
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
                 totalDistance+=distanceBetweenCoords;
                 document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
-
+                // Im going to blank out speed for first 50-100m until it gets more accurate, 
+                // strava does it so I reckon its alright
+                // I think it will only be the first time but will need tested, may need to be
+                // every time start is pressed
                 if(previousTime == null)
                 {
                     previousTime = currentTime;
@@ -81,15 +101,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (avgPace > 0) 
                     {
                         document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
-                    }    
+                    }   
                     else if(avgPace==0)
                     {
                         document.getElementById("pace").innerHTML = "∞/km";
                     }
-                }
-                else
-                {
-                    document.getElementById("pace").innerHTML = "speed aint work";
                 }
             }
             // will add an else here if I like the above so when it fails it will use this because the literature seems
@@ -164,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         navigator.geolocation.watchPosition(updateLocation, locationError, {
         enableHighAccuracy: true,
-        timeout: 1500,
+        timeout: 2000,
         maximumAge: 0
         });
     } 
@@ -201,7 +217,8 @@ document.addEventListener("DOMContentLoaded", function () {
             timerVar = setInterval(countTimer, 1000);
             isRunning = true;
             // make current polyline a new polyline
-            currentPolyline = L.polyline([], {color: 'blue', smoothFactor: 1.3}).addTo(map);
+            currentPolyline = L.polyline([], {color: 'blue'}).addTo(map);
+            rawPolyline = L.polyline([], {color: "red"}).addTo(map);
 
             // might need to add current coords here because it seems to start after you press start, not when
 
@@ -215,6 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
             isRunning = false;
             // end the current polyline
             currentPolyline = null;
+            rawPolyline = null;
             document.getElementById("pace").innerHTML = "--:--/km";
         }
     });
