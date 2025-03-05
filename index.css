@@ -44,7 +44,7 @@ html, body
     align-items: center;
 }
 
-/*note: it shrinks funny so need to fix that for responsive I guess? Not sure since its a 'mobile app', what if it was on a smart watch? But in theory it cant be shrunk and made bigger in app*/
+/*note: it shrinks funny so need to fix that for responsive, thats prob the case with everything that is set to px etc though I guess?*/
 .start-button 
 {
     background: #4CAF50;

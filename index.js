@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let totalDistance = 0;
     let previousTime = null;
     let paceHistory = [];
-    let avgPace;
+    let avgPace = null;
     
     // updating user location and line showing movement
     function updateLocation(position) {
@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let newLat = position.coords.latitude;
         let newLng = position.coords.longitude;
         let currentTime = new Date().getTime();
+        let speed = position.coords.speed;
       
         if (!marker) 
         {
@@ -47,10 +48,46 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
+
             if(previousTime == null)
             {
                 previousTime = currentTime;
             }
+
+            if (speed !== null && speed !== undefined) 
+            {
+                let currentPace;
+                if(speed > 0)
+                {
+                    currentPace = 1000/speed;
+                }
+                else
+                {
+                    currentPace = 0;
+                }
+                paceHistory.push(currentPace);
+                if (paceHistory.length > 12) 
+                {
+                    paceHistory.shift();
+                }
+                
+                let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
+                if (avgPace > 0) 
+                {
+                    document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
+                } 
+                else if(avgPace==0)
+                {
+                    document.getElementById("pace").innerHTML = "∞/km";
+                }
+            }
+            else
+            {
+                document.getElementById("pace").innerHTML = "speed aint work";
+            }
+            // will add an else here if I like the above so when it fails it will use this because the literature seems
+            // to suggest ios doesn't like the speed reading
+/*
             if(previousLat != null && previousLng != null)
             {
                 let pace;
@@ -72,8 +109,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 else
                 {
                     pace = 0;
+                    paceHistory.push(pace);
                 }
-                if(paceHistory.length == 5)
+                if(paceHistory.length == 12)
                 {
                     // https://stackoverflow.com/questions/29544371/finding-the-average-of-an-array-using-js
                     avgPace = paceHistory.reduce((a, b) => a + b) / paceHistory.length;
@@ -94,6 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("pace").innerHTML = "--:--/km";
                 }
             }
+                */
             previousLat = newLat;
             previousLng = newLng;
             previousTime = currentTime;
@@ -118,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         navigator.geolocation.watchPosition(updateLocation, locationError, {
         enableHighAccuracy: true,
-        timeout: 1000,
+        timeout: 1500,
         maximumAge: 0
         });
     } 
@@ -155,7 +194,11 @@ document.addEventListener("DOMContentLoaded", function () {
             timerVar = setInterval(countTimer, 1000);
             isRunning = true;
             // make current polyline a new polyline
-            currentPolyline = L.polyline([], {color: 'blue', smoothFactor: 1.5}).addTo(map);
+            currentPolyline = L.polyline([], {color: 'blue', smoothFactor: 1.3}).addTo(map);
+
+            // might need to add current coords here because it seems to start after you press start, not when
+
+            document.getElementById("pace").innerHTML = "--:--/km";
         } 
         else 
         {
