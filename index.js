@@ -55,7 +55,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let isRunning = false;
     let previousLat = null;
     let previousLng = null;
+    let rawprevlat = null;
+    let rawprevlng = null;
     let totalDistance = 0;
+    let totalrawdist = 0;
     let previousTime = null;
     let paceHistory = [];
     let avgPace = null;
@@ -93,12 +96,15 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
+            rawPolyline.addLatLng([rawLat, rawLng]);
 
             if(previousLat != null && previousLng != null)
             {
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
+                let rawdist = distance(rawprevlat,rawprevlng,rawLat,rawLng);
+                totalrawdist+=rawdist;
                 totalDistance+=distanceBetweenCoords;
-                document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
+                document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + " OR " + totalrawdist.toFixed(2);
 
                 if(previousTime == null)
                 {
@@ -190,6 +196,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 */
             previousLat = newLat;
             previousLng = newLng;
+            rawprevlat = rawLat;
+            rawprevlng = rawLng;
             previousTime = currentTime;
         }
     }
@@ -212,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         navigator.geolocation.watchPosition(updateLocation, locationError, {
         enableHighAccuracy: true,
-        timeout: 2000,
+        timeout: 1500,
         maximumAge: 0
         });
     } 
@@ -265,7 +273,6 @@ document.addEventListener("DOMContentLoaded", function () {
             currentPolyline = null;
             rawPolyline = null;
             document.getElementById("pace").innerHTML = "--:--/km";
-            document.getElementById("distance").innerHTML = "0 km";
         }
     });
 
