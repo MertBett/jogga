@@ -1,5 +1,44 @@
+// https://stackoverflow.com/questions/1134579/smooth-gps-data
+
+class GPSKalmanFilter 
+{
+    constructor (decay = 2.9) 
+    {
+      this.decay = decay
+      this.variance = -1
+      this.minAccuracy = 1
+    }
+  
+    process (lat, lng, accuracy, timestampInMs) {
+      if (accuracy < this.minAccuracy) accuracy = this.minAccuracy
+  
+      if (this.variance < 0) {
+        this.timestampInMs = timestampInMs
+        this.lat = lat
+        this.lng = lng
+        this.variance = accuracy * accuracy
+      } else {
+        const timeIncMs = timestampInMs - this.timestampInMs
+  
+        if (timeIncMs > 0) {
+          this.variance += (timeIncMs * this.decay * this.decay) / 1000
+          this.timestampInMs = timestampInMs
+        }
+  
+        const _k = this.variance / (this.variance + (accuracy * accuracy))
+        this.lat += _k * (lat - this.lat)
+        this.lng += _k * (lng - this.lng)
+  
+        this.variance = (1 - _k) * this.variance
+      }
+  
+      return [this.lng, this.lat]
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
+    const kalmanFilter = new GPSKalmanFilter();
     const map = new L.map('map', { zoomControl: false, attributionControl: true });
 
     // add open street map tile from https://leafletjs.com/index.html
@@ -18,13 +57,17 @@ document.addEventListener("DOMContentLoaded", function () {
     let totalDistance = 0;
     let previousTime = null;
     let paceHistory = [];
-    let avgPace = null;
     
     // updating user location and line showing movement
     function updateLocation(position) {
 
-        let newLat = position.coords.latitude;
-        let newLng = position.coords.longitude;
+        let rawLat = position.coords.latitude;
+        let rawLng = position.coords.longitude;
+        let accuracy = position.coords.accuracy;
+        let timestamp = position.timestamp;
+
+        const [newLng, newLat] = kalmanFilter.process(rawLat, rawLng, accuracy, timestamp);
+
         let currentTime = new Date().getTime();
         let speed = position.coords.speed;
       
@@ -48,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
-            
+
             if(previousLat != null && previousLng != null)
             {
                 let distanceBetweenCoords = distance(previousLat,previousLng, newLat, newLng);
@@ -71,25 +114,23 @@ document.addEventListener("DOMContentLoaded", function () {
                     {
                         currentPace = 0;
                     }
-                    paceHistory.push(currentPace);
-                    if (paceHistory.length > 12) 
+                    paceHistory.push(currentPace);             
+                    if(paceHistory.length==14 && totalDistance > 0.09)
                     {
-                        paceHistory.shift();
+                        let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
+                        if (avgPace > 0) 
+                        {
+                            document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
+                        }   
+                        else if(avgPace==0)
+                        {
+                            document.getElementById("pace").innerHTML = "∞/km";
+                        }
+                        for (let i = 0; i < 4; i++) 
+                        {
+                            paceHistory.shift();
+                        }
                     }
-                
-                    let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
-                    if (avgPace > 0) 
-                    {
-                        document.getElementById("pace").innerHTML = getMinAndSec(avgPace) + "/km";
-                    }    
-                    else if(avgPace==0)
-                    {
-                        document.getElementById("pace").innerHTML = "∞/km";
-                    }
-                }
-                else
-                {
-                    document.getElementById("pace").innerHTML = "speed aint work";
                 }
             }
             // will add an else here if I like the above so when it fails it will use this because the literature seems
@@ -201,8 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
             timerVar = setInterval(countTimer, 1000);
             isRunning = true;
             // make current polyline a new polyline
-            currentPolyline = L.polyline([], {color: 'blue', smoothFactor: 1.3}).addTo(map);
-
+            currentPolyline = L.polyline([], {color: 'blue'}).addTo(map);
             // might need to add current coords here because it seems to start after you press start, not when
 
             document.getElementById("pace").innerHTML = "--:--/km";
@@ -216,6 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // end the current polyline
             currentPolyline = null;
             document.getElementById("pace").innerHTML = "--:--/km";
+            paceHistory = [];
         }
     });
 
