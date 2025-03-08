@@ -4,93 +4,166 @@ html, body
     padding: 0;
     height: 100%;
     width: 100%;
+    font-family: sans-serif;
 }
 
 #map 
 {
-    height: 85vh;
+    position: absolute;
+    top: 100px;
+    left: 0;
+    right: 0;
+    bottom: 80px;
     z-index: 1;
 }
 
-.bottom-nav 
-{
-    color: rgb(255, 255, 255);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 15vh;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 10px 0;
-    z-index: 10;
-}
-
-.nav-item 
-{
-    color: #333;
-    font-size: 22px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-}
-
-.start-wrapper 
-{
-    padding-bottom: 15vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/*note: it shrinks funny so need to fix that for responsive, thats prob the case with everything that is set to px etc though I guess?*/
-.start-button 
-{
-    background: #4CAF50;
-    color: white;
-    width: 14vh;
-    height: 14vh;
-    border-radius: 50%;
-    font-size: 22px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: #fff;
-    font-weight: bold;
-    font-size: 28px;
-}
-
-.statsDropdown
+.statsDropdown 
 {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(0, 0, 0, 0);
-    font-size: 32px;
-    text-align: center;
+    height: 100px;
+    background-color: rgba(255, 255, 255, 0.9);
     z-index: 10;
-    padding-top: 20px;
     display: flex;
     justify-content: space-around;
     align-items: center;
 }
 
-#timer
+.stat-item 
 {
-    color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 8px;
 }
 
-#distance
+.stat-label 
 {
-    color: black;
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.stat-value 
+{
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.bottom-nav 
+{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    background-color: white;
+    z-index: 10;
+}
+
+.nav-item 
+{
+    color: #444;
+    font-size: 16px;
     text-align: center;
     display: flex;
+    flex-direction: column;
     align-items: center;
+    padding: 15px 0;
+    width: 30%;
+    text-decoration: none;
 }
 
-#pace
+.nav-item i 
 {
-    color: black;
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+
+.start-wrapper 
+{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 40%;
+    margin-bottom: 20px;
+    bottom: 10px;
+}
+
+.start-button 
+{
+    background: #007700;
+    color: white;
+    width: 100px; 
+    height: 100px; 
+    font-size: 28px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: cursor;
+    z-index: 11;
+}
+
+.pause-button 
+{
+    background: #ee0505;
+    color: white;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    font-size: 28px;
+    cursor: cursor;
+    z-index: 11;
+}
+
+.finish-button 
+{
+    background: #ffd700;
+    color: white;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    font-size: 28px;
+    cursor: cursor;
+    z-index: 11;
+    margin-left: 10px;
+}
+
+.continue-button 
+{
+    background: #007700;
+    color: white;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    font-size: 28px;
+    cursor: cursor;
+    z-index: 11;
+    margin-right: 10px;
+}
+
+.hidden 
+{
+    display: none;
 }

@@ -1,14 +1,13 @@
 // https://stackoverflow.com/questions/1134579/smooth-gps-data
-
 class GPSKalmanFilter 
 {
-    constructor (decay = 3.05) 
+    constructor (decay = 4) 
     {
       this.decay = decay
       this.variance = -1
       this.minAccuracy = 1
     }
-  
+    
     process (lat, lng, accuracy, timestampInMs) {
       if (accuracy < this.minAccuracy) accuracy = this.minAccuracy
   
@@ -40,6 +39,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const kalmanFilter = new GPSKalmanFilter();
     const map = new L.map('map', { zoomControl: false, attributionControl: true });
+
+    const startButton = document.getElementById('start-button');
+    const pauseButton = document.getElementById('pause-button');
+    const continueButton = document.getElementById('continue-button');
+    const finishButton = document.getElementById('finish-button');
+    const historyButton = document.getElementById('history-button');
+    const settingsButton = document.getElementById('settings-button');
+
+    pauseButton.classList.add('hidden');
+    continueButton.classList.add('hidden');
+    finishButton.classList.add('hidden');
+
+    const myIcon = L.divIcon({
+        html: '<i class="fas fa-circle" style="color: gold; font-size: 20px;"></i>',
+        className: 'marker',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+        popupAnchor: [0, -10]
+    });
 
     // add open street map tile from https://leafletjs.com/index.html
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -73,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
       
         if (!marker) 
         {
-            marker = L.marker([newLat, newLng]).addTo(map);
+            marker = L.marker([newLat, newLng], {icon: myIcon}).addTo(map);
         } 
         else 
         {
@@ -115,11 +133,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         currentPace = 0;
                     }
                     paceHistory.push(currentPace);
-                    if(paceHistory.length > 14)
+                    if(paceHistory.length > 25)
                     {
                         paceHistory.shift();
                     }
-                    if(paceHistory.length==14 && totalDistance > 0.08)
+                    if(paceHistory.length==25 && totalDistance > 0.08)
                     {
                         let avgPace = paceHistory.reduce((a, b) => a + b, 0) / paceHistory.length;
                         if (avgPace > 0) 
@@ -130,11 +148,15 @@ document.addEventListener("DOMContentLoaded", function () {
                         {
                             document.getElementById("pace").innerHTML = "∞/km";
                         }
-                        for (let i = 0; i < 4; i++) 
+                        for (let i = 0; i < 5; i++) 
                         {
                             paceHistory.shift();
                         }
                     }
+                }
+                else
+                {
+                    document.getElementById("pace").innerHTML = "--:--/km";
                 }
             }
             // will add an else here if I like the above so when it fails it will use this because the literature seems
@@ -209,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         navigator.geolocation.watchPosition(updateLocation, locationError, {
         enableHighAccuracy: true,
-        timeout: 1500,
+        timeout: 1000,
         maximumAge: 0
         });
     } 
@@ -234,34 +256,57 @@ document.addEventListener("DOMContentLoaded", function () {
       
       document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
     }
-    
-    // start/stop button
-    const startBtn = document.getElementById('start-button');
 
-    startBtn.addEventListener('click', function handleClick() {
-        if (!isRunning) 
-        {
-            startBtn.textContent = 'Stop';
-            startBtn.style.background = "red";
-            timerVar = setInterval(countTimer, 1000);
-            isRunning = true;
-            // make current polyline a new polyline
-            currentPolyline = L.polyline([], {color: 'blue'}).addTo(map);
-            // might need to add current coords here because it seems to start after you press start, not when
+    startButton.addEventListener('click', function() 
+    {
+        timerVar = setInterval(countTimer, 1000);
+        isRunning = true;
+        currentPolyline = L.polyline([], {color: 'black'}).addTo(map);
+        startButton.classList.add('hidden');
+        pauseButton.classList.remove('hidden');
+        historyButton.classList.add('hidden');
+        settingsButton.classList.add('hidden');
+    });
 
-            document.getElementById("pace").innerHTML = "--:--/km";
-        } 
-        else 
-        {
-            startBtn.textContent = 'Start';
-            startBtn.style.background = "#4CAF50";
-            clearInterval(timerVar);
-            isRunning = false;
-            // end the current polyline
-            currentPolyline = null;
-            document.getElementById("pace").innerHTML = "--:--/km";
-            paceHistory = [];
-        }
+    pauseButton.addEventListener('click', function() 
+    {
+        isRunning = false;
+        clearInterval(timerVar);
+        document.getElementById("pace").innerHTML = "--:--/km";
+        paceHistory = [];
+        finishButton.classList.remove('hidden');
+        continueButton.classList.remove('hidden');
+        pauseButton.classList.add('hidden');
+    });
+
+    finishButton.addEventListener('click', function() 
+    {
+        clearInterval(timerVar);
+        isRunning = false;
+        previousLat = null;
+        previousLng = null;
+        totalDistance = 0;
+        previousTime = null;
+        currentPolyline = null;
+        finishButton.classList.add('hidden');
+        continueButton.classList.add('hidden');
+        startButton.classList.remove('hidden');
+        totalSeconds = 0;
+        document.getElementById("pace").innerHTML = "--:--/km";
+        document.getElementById("distance").innerHTML = "0.00km";
+        document.getElementById("timer").innerHTML = "00:00:00";
+        historyButton.classList.remove('hidden');
+        settingsButton.classList.remove('hidden');
+    });
+
+    continueButton.addEventListener('click', function() 
+    {
+        timerVar = setInterval(countTimer, 1000);
+        isRunning = true;
+        currentPolyline = L.polyline([], {color: 'black'}).addTo(map);
+        finishButton.classList.add('hidden');
+        continueButton.classList.add('hidden');
+        pauseButton.classList.remove('hidden');
     });
 
     // https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula

@@ -12,6 +12,7 @@
   <title>Jogga</title>
   
   <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
   <link rel="manifest" href="/jogga/manifest.json">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
@@ -20,29 +21,50 @@
 <body>
   
   <div class="statsDropdown">
+    <div class="stat-item">
+      <div class="stat-label">Distance</div>
+      <div id="distance" class="stat-value">0.00km</div>
+    </div>
 
-    <div id="distance"></div>
+    <div class="stat-item">
+      <div class="stat-label">Time</div>
+      <div id="timer" class="stat-value">00:00:00</div>
+    </div>
 
-    <div id="timer"></div>
-
-    <div id="pace"></div>
-
+    <div class="stat-item">
+      <div class="stat-label">Pace</div>
+      <div id="pace" class="stat-value">--:--/km</div>
+    </div>
   </div>
 
   <div id="map"></div>
 
   <nav class="bottom-nav">
     
-    <a href="/settings" class="nav-item">Settings</a>
+    <a href="/settings" id="settings-button" class="nav-item">
+      <i class="fas fa-cog"></i>
+      <span>Settings</span>
+    </a>
 
     <div class="start-wrapper">
-
-      <button id="start-button" class="nav-item start-button">Start</div></button>
-      
+      <button id="start-button" class="start-button">
+        <i class="fa-solid fa-play fa-lg fa-beat" style="--fa-animation-duration: 1.5s; color: #ffffff;"></i>
+      </button>
+      <button id="pause-button" class="pause-button">
+        <i class="fa-solid fa-stop fa-lg" style="color: #ffffff;"></i>
+      </button>
+      <button id="continue-button" class="continue-button">
+        <i class="fa-solid fa-play fa-lg" style="color: #ffffff;"></i>
+      </button>
+      <button id="finish-button" class="finish-button">
+        <i class="fa-solid fa-flag-checkered fa-lg" style="color: #ffffff;"></i>
+      </button>
     </div>
 
-    <a href="/history" class="nav-item">History</a>
-
+    <a href="/history" id="history-button" class="nav-item">
+      <i class="fas fa-history"></i>
+      <span>History</span>
+    </a>
   </nav>
 
   <script>
