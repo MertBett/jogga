@@ -292,13 +292,15 @@ document.addEventListener("DOMContentLoaded", function () {
         continueButton.classList.add('hidden');
         startButton.classList.remove('hidden');
         totalSeconds = 0;
+        // NEED TO MAKE IT CLEAR ALL THE POLYLINES
         document.getElementById("pace").innerHTML = "--:--/km";
         document.getElementById("distance").innerHTML = "0.00km";
         document.getElementById("timer").innerHTML = "00:00:00";
         historyButton.classList.remove('hidden');
         settingsButton.classList.remove('hidden');
     });
-
+    // this button is going a funny size on phone. Is it because its running into the settings bits space? Maybe need to change everything from
+    // pixel size to viewport size or something?
     continueButton.addEventListener('click', function() 
     {
         timerVar = setInterval(countTimer, 1000);
