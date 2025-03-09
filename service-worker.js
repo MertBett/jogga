@@ -83,9 +83,7 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       } catch (error) {
          // couldnt get it so errors
-         // think I'll make this a js popup or something later since the map wont show
-         // but tracking should work (?)
-        if (event.request.mode === 'navigate') {
+        if (event.request.mode == 'navigate') {
           return new Response('You are offline. Some features may not work.', {
             headers: { 'Content-Type': 'text/plain' }
           });
