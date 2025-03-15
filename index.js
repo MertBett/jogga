@@ -225,9 +225,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function locationError(error) {
-        // if location services denied then error
-        if (error.code === error.PERMISSION_DENIED) 
-        {
+        // https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError
+        console.error("Geolocation error:", error.code, error.message);
+        
+        if (error.code === 1) {
             Swal.fire({
                 title: "Location Access Denied",
                 text: "Jogga requires access to your location. Enable location services to continue.",
@@ -236,8 +237,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 confirmButtonColor: "#3085d6"
             });
             
-            // hide start button so track can't be used
             startButton.classList.add('hidden');
+        } else if (error.code === 2) { 
+            Swal.fire({
+                title: "Location Unavailable",
+                text: "Your current position is unavailable. Please check your device's GPS or try again later.",
+                icon: "warning",
+                confirmButtonText: "Okay",
+                confirmButtonColor: "#3085d6"
+            });
+        } else if (error.code === 3) {
+            Swal.fire({
+                title: "Location Timeout",
+                text: "It's taking too long to get your location. Please check your GPS settings.",
+                icon: "warning",
+                confirmButtonText: "Okay",
+                confirmButtonColor: "#3085d6"
+            });
+            
+            startLocationTracking();
         }
     }
 
@@ -248,57 +266,75 @@ document.addEventListener("DOMContentLoaded", function () {
         const secs = seconds % 60;
         return min.toString().padStart(2, '0')+":"+secs.toString().padStart(2, '0');
     }
-    
-    // Check if geolocation is available
-    if (navigator.geolocation) {
-        // https://www.slingacademy.com/article/check-user-permissions-using-the-permissions-api-in-javascript/
-        // find out if user allowed use of location
-        if ('permissions' in navigator) 
-        {
-            navigator.permissions.query({name: 'geolocation'}).then(permissionStatus => {
-                if (permissionStatus.state === 'granted') 
-                {
-                    permissionGranted = true;
-                    startButton.classList.remove('hidden');
-                } 
-                else if (permissionStatus.state === 'denied') 
-                {
-                    locationError({
-                        code: 1,
-                        PERMISSION_DENIED: 1
-                    });
-                }
-                
-                // check if they change permissions and remove or allow use accordingly
-                permissionStatus.onchange = function() 
-                {
-                    if (this.state === 'granted') 
-                    {
-                        permissionGranted = true;
-                        startButton.classList.remove('hidden');
-                    } else if (this.state === 'denied') 
-                    {
-                        permissionGranted = false;
-                        startButton.classList.add('hidden');
-                        locationError({
-                            code: 1,
-                            PERMISSION_DENIED: 1
-                        });
-                    }
-                };
-            }).catch(error => {
-                console.error("Error checking permission:", error);
-            });
+
+    function startLocationTracking() {
+        // Clear any existing watch to avoid duplicates
+        if (watchPositionId !== null) {
+            navigator.geolocation.clearWatch(watchPositionId);
         }
         
-        navigator.geolocation.watchPosition(updateLocation, locationError, {
+        // Start a new watch
+        watchPositionId = navigator.geolocation.watchPosition(updateLocation, locationError, {
             enableHighAccuracy: true,
             timeout: 10000, 
             maximumAge: 0
         });
-    } 
-    else 
-    {
+    }
+    
+    if (navigator.geolocation) {
+        // FIXED: Improved permissions checking
+        if ('permissions' in navigator) {
+            navigator.permissions.query({name: 'geolocation'})
+                .then(permissionStatus => {
+                    if (permissionStatus.state === 'granted') {
+                        permissionGranted = true;
+                        startButton.classList.remove('hidden');
+                        startLocationTracking();
+                    } else if (permissionStatus.state === 'denied') {
+                        permissionGranted = false;
+                        // Use standard GeolocationPositionError codes
+                        locationError({
+                            code: 1, // PERMISSION_DENIED
+                            message: "Permission denied"
+                        });
+                    } else {
+                        // If permission state is 'prompt', we'll wait for user to decide
+                        console.log("Permission status: prompt - waiting for user decision");
+                        // Start location tracking anyway, as it will trigger the permission prompt
+                        startLocationTracking();
+                    }
+                    
+                    // Handle permission changes
+                    permissionStatus.onchange = function() {
+                        console.log("Permission status changed to:", this.state);
+                        if (this.state === 'granted') {
+                            permissionGranted = true;
+                            startButton.classList.remove('hidden');
+                            startLocationTracking();
+                        } else if (this.state === 'denied') {
+                            permissionGranted = false;
+                            startButton.classList.add('hidden');
+                            if (watchPositionId !== null) {
+                                navigator.geolocation.clearWatch(watchPositionId);
+                                watchPositionId = null;
+                            }
+                            locationError({
+                                code: 1, // PERMISSION_DENIED
+                                message: "Permission denied"
+                            });
+                        }
+                    };
+                })
+                .catch(error => {
+                    console.error("Error checking permission:", error);
+                    startLocationTracking();
+                });
+        } else {
+            // Permissions API not supported, fall back to direct watchPosition
+            console.log("Permissions API not supported, using watchPosition directly");
+            startLocationTracking();
+        }
+    } else {
         // error when browser can't gps
         Swal.fire({
             title: "GPS Not Supported",
@@ -308,7 +344,7 @@ document.addEventListener("DOMContentLoaded", function () {
             confirmButtonColor: "#3085d6"
         });
     }
-    
+
     // https://stackoverflow.com/questions/5517597/plain-count-up-timer-in-javascript
     let totalSeconds = 0;
     let timerVar;

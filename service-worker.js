@@ -10,8 +10,8 @@ const FILES_TO_CACHE = [
   '/jogga/icons/jogga_icon_bigger_brighter_192.png',
   '/jogga/icons/jogga_icon_bigger_brighter_512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
-  'https://unpkg.com/leaflet/dist/leaflet.css',
-  'https://unpkg.com/leaflet/dist/leaflet.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11'
 ];
 
