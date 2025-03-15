@@ -1,4 +1,5 @@
 // https://stackoverflow.com/questions/1134579/smooth-gps-data
+// kalman filter which filters out gps noise
 class GPSKalmanFilter 
 {
     constructor (decay = 4) 
@@ -49,6 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const settingsButton = document.getElementById('settings-button');
     const whereamiButton = document.getElementById('whereami-button');
 
+    // hide buttons until location established
     startButton.classList.add('hidden');
     pauseButton.classList.add('hidden');
     continueButton.classList.add('hidden');
@@ -68,6 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }).addTo(map);
 
     map.attributionControl.setPosition('topleft');
+    
+    map.setView([0, 0], 2);
     
     let marker;
     let currentPolyline;
@@ -94,11 +98,13 @@ document.addEventListener("DOMContentLoaded", function () {
         let accuracy = position.coords.accuracy;
         let timestamp = position.timestamp;
 
+        // filter out gps noise
         const [newLng, newLat] = kalmanFilter.process(rawLat, rawLng, accuracy, timestamp);
 
         let currentTime = new Date().getTime();
         let speed = position.coords.speed;
       
+        // move the marker to current coords
         if (!marker) 
         {
             marker = L.marker([newLat, newLng], {icon: myIcon}).addTo(map);
@@ -134,6 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (speed != null && speed != undefined) 
                 {
+                    // calc pace in km/hr
                     let currentPace;
                     if(speed > 0)
                     {
@@ -143,6 +150,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     {
                         currentPace = 0;
                     }
+                    // keep 25 speed readings and avg them so any rogue readings have less impact
                     paceHistory.push(currentPace);
                     if(paceHistory.length > 25)
                     {
@@ -224,127 +232,78 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // handle location errors
+    // https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError
     function locationError(error) {
-        // https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError
-        console.error("Geolocation error:", error.code, error.message);
-        
-        if (error.code === 1) {
+        // case user denied location services
+        if (error.code === 1) 
+        {
             Swal.fire({
                 title: "Location Access Denied",
-                text: "Jogga requires access to your location. Enable location services to continue.",
+                text: "Jogga requires access to your location. Enable location services and reload the page.",
                 icon: "error",
                 confirmButtonText: "Okay",
-                confirmButtonColor: "#3085d6"
+                confirmButtonColor: "#007700"
             });
             
+            // hide start button so track can't be used
             startButton.classList.add('hidden');
-        } else if (error.code === 2) { 
+        } 
+        else if (error.code === 2) 
+        // gps can't get location
+        {
             Swal.fire({
                 title: "Location Unavailable",
                 text: "Your current position is unavailable. Please check your device's GPS or try again later.",
                 icon: "warning",
                 confirmButtonText: "Okay",
-                confirmButtonColor: "#3085d6"
+                confirmButtonColor: "#007700"
             });
-        } else if (error.code === 3) {
+        } 
+        // gps timed out
+        else if (error.code === 3) 
+        {
             Swal.fire({
                 title: "Location Timeout",
                 text: "It's taking too long to get your location. Please check your GPS settings.",
                 icon: "warning",
                 confirmButtonText: "Okay",
-                confirmButtonColor: "#3085d6"
+                confirmButtonColor: "#007700"
             });
-            
-            startLocationTracking();
         }
     }
 
     // https://www.programmingbasic.com/convert-seconds-to-minutes-and-seconds-javascript
+    // turn seconds to mins and seconds
     function getMinAndSec(seconds){
         seconds = Math.round(seconds);
         const min = Math.floor(seconds/60);
         const secs = seconds % 60;
         return min.toString().padStart(2, '0')+":"+secs.toString().padStart(2, '0');
     }
-
-    function startLocationTracking() {
-        // Clear any existing watch to avoid duplicates
-        if (watchPositionId !== null) {
-            navigator.geolocation.clearWatch(watchPositionId);
-        }
-        
-        // Start a new watch
-        watchPositionId = navigator.geolocation.watchPosition(updateLocation, locationError, {
+    
+    // track location
+    if (navigator.geolocation) 
+    {
+        // Simply start watchPosition - this should prompt for permission if needed
+        navigator.geolocation.watchPosition(updateLocation, locationError, {
             enableHighAccuracy: true,
             timeout: 10000, 
             maximumAge: 0
         });
-    }
-    
-    if (navigator.geolocation) {
-        // FIXED: Improved permissions checking
-        if ('permissions' in navigator) {
-            navigator.permissions.query({name: 'geolocation'})
-                .then(permissionStatus => {
-                    if (permissionStatus.state === 'granted') {
-                        permissionGranted = true;
-                        startButton.classList.remove('hidden');
-                        startLocationTracking();
-                    } else if (permissionStatus.state === 'denied') {
-                        permissionGranted = false;
-                        // Use standard GeolocationPositionError codes
-                        locationError({
-                            code: 1, // PERMISSION_DENIED
-                            message: "Permission denied"
-                        });
-                    } else {
-                        // If permission state is 'prompt', we'll wait for user to decide
-                        console.log("Permission status: prompt - waiting for user decision");
-                        // Start location tracking anyway, as it will trigger the permission prompt
-                        startLocationTracking();
-                    }
-                    
-                    // Handle permission changes
-                    permissionStatus.onchange = function() {
-                        console.log("Permission status changed to:", this.state);
-                        if (this.state === 'granted') {
-                            permissionGranted = true;
-                            startButton.classList.remove('hidden');
-                            startLocationTracking();
-                        } else if (this.state === 'denied') {
-                            permissionGranted = false;
-                            startButton.classList.add('hidden');
-                            if (watchPositionId !== null) {
-                                navigator.geolocation.clearWatch(watchPositionId);
-                                watchPositionId = null;
-                            }
-                            locationError({
-                                code: 1, // PERMISSION_DENIED
-                                message: "Permission denied"
-                            });
-                        }
-                    };
-                })
-                .catch(error => {
-                    console.error("Error checking permission:", error);
-                    startLocationTracking();
-                });
-        } else {
-            // Permissions API not supported, fall back to direct watchPosition
-            console.log("Permissions API not supported, using watchPosition directly");
-            startLocationTracking();
-        }
-    } else {
-        // error when browser can't gps
+    } 
+    else 
+    {
+        // when browser can't gps
         Swal.fire({
             title: "GPS Not Supported",
             text: "Your browser doesn't support geolocation, which is required for this app to work.",
             icon: "error",
             confirmButtonText: "Okay",
-            confirmButtonColor: "#3085d6"
+            confirmButtonColor: "#007700"
         });
     }
-
+    
     // https://stackoverflow.com/questions/5517597/plain-count-up-timer-in-javascript
     let totalSeconds = 0;
     let timerVar;
@@ -362,6 +321,8 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
     }
 
+    // following are all functions to add and remove buttons when one is clicked
+    // and to stop and start timers, lines etc
     startButton.addEventListener('click', function() 
     {
         timerVar = setInterval(countTimer, 1000);
@@ -416,6 +377,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
+    // distance between 2 points on globe
     function distance(lat1, lon1, lat2, lon2) {
         const r = 6371; // km
         const p = Math.PI / 180;
@@ -427,6 +389,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return 2 * r * Math.asin(Math.sqrt(a));
     }
 
+    // button moving focus back to user so if they get lost on map they can re-centre
     whereamiButton.addEventListener('click', function()
     {
         if (marker) 
@@ -442,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function () {
             text: "Tracking will continue but map won't update until you're back online",
             icon: "warning",
             confirmButtonText: "Okay",
-            confirmButtonColor: "#3085d6"
+            confirmButtonColor: "#007700"
         });
     });
 });
