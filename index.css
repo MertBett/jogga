@@ -163,6 +163,27 @@ html, body
     margin-right: 10px;
 }
 
+.whereami-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: cursor;
+    z-index: 500;
+}
+
+.whereami-button i {
+    font-size: 20px;
+    color: #007700;
+}
+
 .hidden 
 {
     display: none;
