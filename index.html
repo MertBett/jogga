@@ -37,7 +37,11 @@
     </div>
   </div>
 
-  <div id="map"></div>
+  <div id="map">
+    <button id="whereami-button" class="whereami-button">
+      <i class="fas fa-location-crosshairs"></i>
+    </button>
+  </div>
 
   <nav class="bottom-nav">
     
@@ -75,7 +79,10 @@
         .catch(err => console.log('Service worker registration failed', err));
     }
   </script>
-
+  
+  <!-- I used chat gpt to find pop up library, google just wasnt getting me when I said popup library for javascript -->
+  <!-- https://chatgpt.com/share/67d36224-4738-8002-b831-587eb3cd8b7a -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="index.js"></script>
 

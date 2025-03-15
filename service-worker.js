@@ -12,9 +12,7 @@ const FILES_TO_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
   'https://unpkg.com/leaflet/dist/leaflet.css',
   'https://unpkg.com/leaflet/dist/leaflet.js',
-  'https://unpkg.com/leaflet/dist/images/marker-icon.png',
-  'https://unpkg.com/leaflet/dist/images/marker-shadow.png',
-  'https://unpkg.com/leaflet/dist/images/marker-icon-2x.png'
+  'https://cdn.jsdelivr.net/npm/sweetalert2@11'
 ];
 
 

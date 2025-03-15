@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const kalmanFilter = new GPSKalmanFilter();
     const map = new L.map('map', { zoomControl: false, attributionControl: true });
+    const polylineGroup = L.layerGroup().addTo(map);
 
     const startButton = document.getElementById('start-button');
     const pauseButton = document.getElementById('pause-button');
@@ -46,7 +47,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const finishButton = document.getElementById('finish-button');
     const historyButton = document.getElementById('history-button');
     const settingsButton = document.getElementById('settings-button');
+    const whereamiButton = document.getElementById('whereami-button');
 
+    startButton.classList.add('hidden');
     pauseButton.classList.add('hidden');
     continueButton.classList.add('hidden');
     finishButton.classList.add('hidden');
@@ -75,9 +78,16 @@ document.addEventListener("DOMContentLoaded", function () {
     let totalDistance = 0;
     let previousTime = null;
     let paceHistory = [];
+    let permissionGranted = false;
     
     // updating user location and line showing movement
     function updateLocation(position) {
+        // if we get here then we have location services
+        if (!permissionGranted) 
+        {
+            permissionGranted = true;
+            startButton.classList.remove('hidden');
+        }
 
         let rawLat = position.coords.latitude;
         let rawLng = position.coords.longitude;
@@ -97,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
         {
             marker.setLatLng([newLat, newLng]);
         }
-      
+
         // don't want it snapping you back to your position all the time because then you can't move the map around and plan where you're going
         // so only do it when you initially enter the page.
         if (newVisit) 
@@ -105,6 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
             map.setView([newLat, newLng], 19);
             newVisit = false;
         }
+
         // if running then draw line
         if (isRunning) 
         {
@@ -213,11 +224,23 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function locationError(error) 
-    {
-        console.error("Error finding location", error);
+    function locationError(error) {
+        // if location services denied then error
+        if (error.code === error.PERMISSION_DENIED) 
+        {
+            Swal.fire({
+                title: "Location Access Denied",
+                text: "Jogga requires access to your location. Enable location services to continue.",
+                icon: "error",
+                confirmButtonText: "Okay",
+                confirmButtonColor: "#3085d6"
+            });
+            
+            // hide start button so track can't be used
+            startButton.classList.add('hidden');
+        }
     }
-    
+
     // https://www.programmingbasic.com/convert-seconds-to-minutes-and-seconds-javascript
     function getMinAndSec(seconds){
         seconds = Math.round(seconds);
@@ -225,19 +248,65 @@ document.addEventListener("DOMContentLoaded", function () {
         const secs = seconds % 60;
         return min.toString().padStart(2, '0')+":"+secs.toString().padStart(2, '0');
     }
-
-    // get user location
-    if (navigator.geolocation) 
-    {
+    
+    // Check if geolocation is available
+    if (navigator.geolocation) {
+        // https://www.slingacademy.com/article/check-user-permissions-using-the-permissions-api-in-javascript/
+        // find out if user allowed use of location
+        if ('permissions' in navigator) 
+        {
+            navigator.permissions.query({name: 'geolocation'}).then(permissionStatus => {
+                if (permissionStatus.state === 'granted') 
+                {
+                    permissionGranted = true;
+                    startButton.classList.remove('hidden');
+                } 
+                else if (permissionStatus.state === 'denied') 
+                {
+                    locationError({
+                        code: 1,
+                        PERMISSION_DENIED: 1
+                    });
+                }
+                
+                // check if they change permissions and remove or allow use accordingly
+                permissionStatus.onchange = function() 
+                {
+                    if (this.state === 'granted') 
+                    {
+                        permissionGranted = true;
+                        startButton.classList.remove('hidden');
+                    } else if (this.state === 'denied') 
+                    {
+                        permissionGranted = false;
+                        startButton.classList.add('hidden');
+                        locationError({
+                            code: 1,
+                            PERMISSION_DENIED: 1
+                        });
+                    }
+                };
+            }).catch(error => {
+                console.error("Error checking permission:", error);
+            });
+        }
+        
         navigator.geolocation.watchPosition(updateLocation, locationError, {
-        enableHighAccuracy: true,
-        timeout: 1000,
-        maximumAge: 0
+            enableHighAccuracy: true,
+            timeout: 10000, 
+            maximumAge: 0
         });
     } 
     else 
     {
-      alert("Geolocation is not supported by your browser(?)");
+        // error when browser can't gps
+        Swal.fire({
+            title: "GPS Not Supported",
+            text: "Your browser doesn't support geolocation, which is required for this app to work.",
+            icon: "error",
+            confirmButtonText: "Okay",
+            confirmButtonColor: "#3085d6"
+        });
     }
     
     // https://stackoverflow.com/questions/5517597/plain-count-up-timer-in-javascript
@@ -261,7 +330,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         timerVar = setInterval(countTimer, 1000);
         isRunning = true;
-        currentPolyline = L.polyline([], {color: 'black'}).addTo(map);
+        currentPolyline = L.polyline([], {color: 'black'}).addTo(polylineGroup);
         startButton.classList.add('hidden');
         pauseButton.classList.remove('hidden');
         historyButton.classList.add('hidden');
@@ -292,20 +361,19 @@ document.addEventListener("DOMContentLoaded", function () {
         continueButton.classList.add('hidden');
         startButton.classList.remove('hidden');
         totalSeconds = 0;
-        // NEED TO MAKE IT CLEAR ALL THE POLYLINES
+        polylineGroup.clearLayers();
         document.getElementById("pace").innerHTML = "--:--/km";
         document.getElementById("distance").innerHTML = "0.00km";
         document.getElementById("timer").innerHTML = "00:00:00";
         historyButton.classList.remove('hidden');
         settingsButton.classList.remove('hidden');
     });
-    // this button is going a funny size on phone. Is it because its running into the settings bits space? Maybe need to change everything from
-    // pixel size to viewport size or something?
+
     continueButton.addEventListener('click', function() 
     {
         timerVar = setInterval(countTimer, 1000);
         isRunning = true;
-        currentPolyline = L.polyline([], {color: 'black'}).addTo(map);
+        currentPolyline = L.polyline([], {color: 'black'}).addTo(polylineGroup);
         finishButton.classList.add('hidden');
         continueButton.classList.add('hidden');
         pauseButton.classList.remove('hidden');
@@ -322,4 +390,23 @@ document.addEventListener("DOMContentLoaded", function () {
       
         return 2 * r * Math.asin(Math.sqrt(a));
     }
+
+    whereamiButton.addEventListener('click', function()
+    {
+        if (marker) 
+        {
+            map.setView(marker.getLatLng(), 19);
+        }
+    });
+
+    // tell user they are offline and how map might not load but it's stull tracking
+    window.addEventListener('offline', function() {
+        Swal.fire({
+            title: "You're offline",
+            text: "Tracking will continue but map won't update until you're back online",
+            icon: "warning",
+            confirmButtonText: "Okay",
+            confirmButtonColor: "#3085d6"
+        });
+    });
 });
