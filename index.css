@@ -97,73 +97,106 @@ html, body
     bottom: 10px;
 }
 
-.start-button 
+.start-button
 {
-    background: #007700;
-    color: white;
-    width: 100px; 
-    height: 100px; 
-    font-size: 28px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     border: none;
-    cursor: cursor;
+    cursor: pointer;
     z-index: 11;
+    font-size: 28px;
+    background: #007700;
+    color: white;
 }
 
 .pause-button 
 {
-    background: #ee0505;
-    color: white;
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     border: none;
-    font-size: 28px;
-    cursor: cursor;
+    cursor: pointer;
     z-index: 11;
+    font-size: 28px;
+    background: #ee0505;
+    color: white;
 }
 
 .finish-button 
 {
-    background: #ffd700;
-    color: white;
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     border: none;
-    font-size: 28px;
-    cursor: cursor;
+    cursor: pointer;
     z-index: 11;
-    margin-left: 10px;
+    font-size: 28px;
+    background: #ffd700;
+    color: white;
+    margin-left: 8px;
 }
 
 .continue-button 
 {
-    background: #007700;
-    color: white;
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     border: none;
-    font-size: 28px;
-    cursor: cursor;
+    cursor: pointer;
     z-index: 11;
-    margin-right: 10px;
+    font-size: 28px;
+    background: #007700;
+    color: white;
+    margin-right: 8px;
 }
 
-.whereami-button {
+.hidden 
+{
+    display: none;
+}
+
+/* mmake buttons shrink for smaller screens because they were becoming ovals */
+/* https://www.tutorialspoint.com/changing-layouts-based-on-screen-size-using-css */
+@media (max-width: 480px) 
+{
+    .start-wrapper 
+    {
+        width: 60%;
+    }
+
+    .start-button, .pause-button, .continue-button, .finish-button 
+    {
+        width: 75px;
+        height: 75px;
+        font-size: 20px;
+    }
+    
+    .finish-button 
+    {
+        margin-left: 5px;
+    }
+    
+    .continue-button 
+    {
+        margin-right: 5px;
+    }
+}
+
+.whereami-button 
+{
     position: absolute;
     bottom: 20px;
     right: 20px;
@@ -179,7 +212,8 @@ html, body
     z-index: 500;
 }
 
-.whereami-button i {
+.whereami-button i 
+{
     font-size: 20px;
     color: #007700;
 }
