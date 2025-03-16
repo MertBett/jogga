@@ -24,7 +24,7 @@ class GPSKalmanFilter
           this.variance += (timeIncMs * this.decay * this.decay) / 1000
           this.timestampInMs = timestampInMs
         }
-  
+    
         const _k = this.variance / (this.variance + (accuracy * accuracy))
         this.lat += _k * (lat - this.lat)
         this.lng += _k * (lng - this.lng)
@@ -33,6 +33,122 @@ class GPSKalmanFilter
       }
   
       return [this.lng, this.lat]
+    }
+}
+
+let db;
+
+// https://www.javascripttutorial.net/web-apis/javascript-indexeddb/ took the db from here and changed for my use case
+// same for all db stuff
+// initialise db
+function initDB() {
+    // check for IndexedDB support
+    if (!window.indexedDB) {
+        console.log("Your browser doesn't support IndexedDB");
+        return;
+    }
+
+    // open the Jogga database with the version 1
+    const request = indexedDB.open('JoggaDB', 1);
+
+    // create the runs store and index
+    request.onupgradeneeded = (event) => {
+        db = event.target.result;
+
+        // create the runs object store with auto-increment
+        if (!db.objectStoreNames.contains('runs')) {
+            const store = db.createObjectStore('runs', {
+                autoIncrement: true
+            });
+            
+            // create an index on the date
+            store.createIndex('date', 'date', { unique: false });
+            
+            console.log('Runs object store created');
+        }
+    };
+
+    // handle the error event
+    request.onerror = (event) => {
+        console.error('Database error:', event.target.error);
+    };
+
+    // handle the success event
+    request.onsuccess = (event) => {
+        db = event.target.result;
+        console.log('Database opened successfully');
+
+        // just put this so when I test on phone I can see what's happening
+        Swal.fire({
+            title: "DB created!",
+            icon: "success",
+            confirmButtonText: "Great!",
+            confirmButtonColor: "#007700"
+        });
+    };
+}
+
+// save a run to the db
+function saveRun(runData) 
+{
+
+    // check db exists
+    if (!db) 
+    {
+        console.error('Database not initialised');
+        Swal.fire({
+            title: "Error Saving Run",
+            text: "Database not initialised. Please reload the page.",
+            icon: "error",
+            confirmButtonText: "Okay",
+            confirmButtonColor: "#007700"
+        });
+        return;
+    }
+    
+    // create a new transaction
+    const txn = db.transaction('runs', 'readwrite');
+
+    // get the runs object store
+    const store = txn.objectStore('runs');
+    
+    // format the run data
+    const run = {
+        date: new Date(),
+        duration: runData.duration,
+        distance: runData.distance,
+        polylines: runData.polylines
+    };
+    
+    // add the run to db
+    let query = store.add(run);
+
+    // handle success case
+    query.onsuccess = function (event) {
+        console.log('Run saved with ID:', event.target.result);
+        
+        // just put this so when I test on phone I can see what's happening
+        Swal.fire({
+            title: "Run Saved!",
+            text: `Your ${runData.distance}km run has been saved.`,
+            icon: "success",
+            confirmButtonText: "Great!",
+            confirmButtonColor: "#007700"
+        });
+    };
+
+    // handle the error case
+    query.onerror = function (event) {
+        console.error('Error saving run:', event.target.error);
+        
+        // just put this so when I test on phone I can see what's happening
+        Swal.fire({
+            title: "Error Saving Run",
+            text: "There was a problem saving your run data.",
+            icon: "error",
+            confirmButtonText: "Okay",
+            confirmButtonColor: "#007700"
+        });
     }
 }
 
@@ -55,6 +171,8 @@ document.addEventListener("DOMContentLoaded", function () {
     pauseButton.classList.add('hidden');
     continueButton.classList.add('hidden');
     finishButton.classList.add('hidden');
+
+    initDB();
 
     const myIcon = L.divIcon({
         html: '<i class="fas fa-circle" style="color: gold; font-size: 20px;"></i>',
@@ -83,6 +201,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let previousTime = null;
     let paceHistory = [];
     let permissionGranted = false;
+    
+    // tracking current line and all line sso they can be saved
+    let allPolylines = [];
+    let currentPolylineCoords = [];
     
     // updating user location and line showing movement
     function updateLocation(position) {
@@ -126,6 +248,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isRunning) 
         {
             currentPolyline.addLatLng([newLat, newLng]);
+            
+            // Store coordinate for database storage
+            currentPolylineCoords.push([newLat, newLng]);
 
             if(previousLat != null && previousLng != null)
             {
@@ -178,6 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("pace").innerHTML = "--:--/km";
                 }
             }
+
             // will add an else here if I like the above so when it fails it will use this because the literature seems
             // to suggest ios doesn't like the speed reading
 /*
@@ -321,13 +447,30 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
     }
 
+    // take the run data and pass it to saverun
+    function saveRunToDatabase() 
+    {
+        const runData = {
+            duration: totalSeconds,
+            distance: parseFloat(totalDistance.toFixed(2)),
+            polylines: allPolylines,
+        };
+            
+        // save run to db
+        saveRun(runData);
+    }
+
     // following are all functions to add and remove buttons when one is clicked
     // and to stop and start timers, lines etc
     startButton.addEventListener('click', function() 
     {
         timerVar = setInterval(countTimer, 1000);
         isRunning = true;
+        
+        // create polyline and add to map
         currentPolyline = L.polyline([], {color: 'black'}).addTo(polylineGroup);
+        currentPolylineCoords = [];
+        
         startButton.classList.add('hidden');
         pauseButton.classList.remove('hidden');
         historyButton.classList.add('hidden');
@@ -340,6 +483,12 @@ document.addEventListener("DOMContentLoaded", function () {
         clearInterval(timerVar);
         document.getElementById("pace").innerHTML = "--:--/km";
         paceHistory = [];
+        
+        // save current polyline to all polylines
+        if (currentPolylineCoords.length > 0) {
+            allPolylines.push([...currentPolylineCoords]);
+        }
+        
         finishButton.classList.remove('hidden');
         continueButton.classList.remove('hidden');
         pauseButton.classList.add('hidden');
@@ -349,19 +498,30 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         clearInterval(timerVar);
         isRunning = false;
+        
+        // save run if its not a misclick basically
+        if (totalDistance > 0 && totalSeconds > 0 && allPolylines.length > 0) {
+            saveRunToDatabase();
+        }
+        
+        // reset everything
         previousLat = null;
         previousLng = null;
         totalDistance = 0;
         previousTime = null;
         currentPolyline = null;
-        finishButton.classList.add('hidden');
-        continueButton.classList.add('hidden');
-        startButton.classList.remove('hidden');
+        currentPolylineCoords = [];
+        allPolylines = [];
         totalSeconds = 0;
+        
         polylineGroup.clearLayers();
         document.getElementById("pace").innerHTML = "--:--/km";
         document.getElementById("distance").innerHTML = "0.00km";
         document.getElementById("timer").innerHTML = "00:00:00";
+
+        finishButton.classList.add('hidden');
+        continueButton.classList.add('hidden');
+        startButton.classList.remove('hidden');
         historyButton.classList.remove('hidden');
         settingsButton.classList.remove('hidden');
     });
@@ -370,7 +530,11 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         timerVar = setInterval(countTimer, 1000);
         isRunning = true;
+        
+        // new polyline
         currentPolyline = L.polyline([], {color: 'black'}).addTo(polylineGroup);
+        currentPolylineCoords = [];
+        
         finishButton.classList.add('hidden');
         continueButton.classList.add('hidden');
         pauseButton.classList.remove('hidden');
