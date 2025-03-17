@@ -5,6 +5,7 @@ const FILES_TO_CACHE = [
   '/jogga/index.html',
   '/jogga/index.css',
   '/jogga/index.js',
+  '/jogga/history.html',
   '/jogga/manifest.json',
   '/jogga/icons/jogga_icon_bigger_brighter_180.png',
   '/jogga/icons/jogga_icon_bigger_brighter_192.png',

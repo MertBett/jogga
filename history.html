@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="theme-color" content="#4285f4">
+
+  <title>Jogga - Run History</title>
+  
+  <link rel="stylesheet" href="history.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
+  <link rel="manifest" href="/jogga/manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""/>
+
+</head>
+
+<body>
+
+  <div class="history-header">
+    <h1>Run History</h1>
+  </div>
+
+  <div class="history-content">
+    <div id="run-list-container" class="run-list"></div>
+    <div id="no-runs-message" class="no-runs-message hidden">
+      <i class="fas fa-running fa-3x"></i>
+      <p>No runs recorded yet</p>
+    </div>
+  </div>
+
+
+  <!-- https://www.w3schools.com/howto/howto_css_modals.asp --> 
+  <div id="run-detail-modal" class="run-detail-modal hidden">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2 id="modal-title">Run Details</h2>
+        <button id="close-modal" class="close-button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div id="run-stats" class="run-stats">
+          <div class="stat">
+            <div class="stat-label">Date</div>
+            <div id="detail-date" class="stat-value"></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Distance</div>
+            <div id="detail-distance" class="stat-value"></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Duration</div>
+            <div id="detail-duration" class="stat-value"></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Pace</div>
+            <div id="detail-pace" class="stat-value"></div>
+          </div>
+        </div>
+
+        <div id="detail-map" class="detail-map"></div>
+
+        <div class="detail-actions">
+          <button id="delete-run" class="delete-button">
+            <i class="fas fa-trash"></i> Delete Run
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="settings.html" id="settings-button" class="nav-item">
+      <i class="fas fa-cog"></i>
+      <div>Settings</div>
+    </a>
+
+    <a href="index.html" id="home-button" class="nav-item">
+      <i class="fas fa-house"></i>
+      <div>Home</div>
+    </a>
+  </nav>
+
+  <!-- I used chat gpt to find pop up library, google just wasnt getting me when I said popup library for javascript -->
+  <!-- https://chatgpt.com/share/67d36224-4738-8002-b831-587eb3cd8b7a -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""></script>
+  <script src="history.js"></script>
+</body>
+</html>
