@@ -1,0 +1,96 @@
+html, body 
+{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: sans-serif;
+}
+
+.bottom-nav 
+{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    background-color: white;
+    z-index: 10;
+}
+
+.nav-item 
+{
+    color: #444;
+    font-size: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 0;
+    width: 30%;
+    text-decoration: none;
+}
+
+.nav-item i 
+{
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+
+.history-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 10;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.history-header h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.history-content {
+    margin-top: 70px;
+    padding: 10px;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+}
+
+.run-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.no-runs-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 70vh;
+    text-align: center;
+    color: #666;
+    gap: 20px;
+}
+
+.no-runs-message i {
+    color: #007700;
+}
+
+.no-runs-message p {
+    font-size: 20px;
+    margin: 0;
+}
+
+.hidden {
+    display: none;
+}
