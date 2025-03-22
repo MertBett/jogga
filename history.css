@@ -5,6 +5,7 @@ html, body
     height: 100%;
     width: 100%;
     font-family: sans-serif;
+    overflow-y: auto;
 }
 
 .bottom-nav 
@@ -23,7 +24,7 @@ html, body
 
 .nav-item 
 {
-    color: #444;
+    color: #000000;
     font-size: 16px;
     text-align: center;
     display: flex;
@@ -46,7 +47,7 @@ html, body
     left: 0;
     width: 100%;
     height: 90px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: white;
     z-index: 10;
     display: flex;
     justify-content: space-around;
@@ -59,9 +60,9 @@ html, body
 }
 
 .history-content {
-    margin-top: 70px;
+    margin-top: 90px;
     padding: 10px;
-    height: calc(100vh - 70px);
+    padding-bottom: 90px;
     overflow-y: auto;
 }
 
@@ -71,6 +72,49 @@ html, body
     gap: 12px;
 }
 
+.run-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.run-card-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.run-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.run-date {
+    font-size: 14px;
+    color: black;
+    margin-bottom: 5px;
+}
+
+.run-distance {
+    font-size: 20px;
+    font-weight: 600;
+    color: black;
+}
+
+.run-duration {
+    font-size: 16px;
+    font-weight: 500;
+    color: black;
+}
+
+.run-pace {
+    font-size: 14px;
+    color: black;
+}
+
 .no-runs-message {
     display: flex;
     flex-direction: column;
@@ -78,7 +122,7 @@ html, body
     justify-content: center;
     height: 70vh;
     text-align: center;
-    color: #666;
+    color: black;
     gap: 20px;
 }
 
@@ -89,6 +133,110 @@ html, body
 .no-runs-message p {
     font-size: 20px;
     margin: 0;
+}
+
+.run-detail-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    border-radius: 8px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background-color: #007700;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.run-stats {
+    display: grid;
+    gap: 15px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: white;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: black;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: black;
+}
+
+.detail-map {
+    height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.detail-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.delete-button {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .hidden {

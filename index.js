@@ -362,7 +362,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError
     function locationError(error) {
         // case user denied location services
-        if (error.code === 1) 
+        if (error.code == 1) 
         {
             Swal.fire({
                 title: "Location Access Denied",
@@ -375,7 +375,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // hide start button so track can't be used
             startButton.classList.add('hidden');
         } 
-        else if (error.code === 2) 
+        else if (error.code == 2) 
         // gps can't get location
         {
             Swal.fire({
@@ -387,7 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         } 
         // gps timed out
-        else if (error.code === 3) 
+        else if (error.code == 3) 
         {
             Swal.fire({
                 title: "Location Timeout",
