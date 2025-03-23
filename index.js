@@ -44,6 +44,7 @@ let db;
 function initDB() {
     // check for IndexedDB support
     if (!window.indexedDB) {
+        // this should prob be an error
         console.log("Your browser doesn't support IndexedDB");
         return;
     }
@@ -63,28 +64,18 @@ function initDB() {
             
             // create an index on the date
             store.createIndex('date', 'date', { unique: false });
-            
-            console.log('Runs object store created');
         }
     };
 
     // handle the error event
     request.onerror = (event) => {
+        // do I need this now?
         console.error('Database error:', event.target.error);
     };
 
     // handle the success event
     request.onsuccess = (event) => {
         db = event.target.result;
-        console.log('Database opened successfully');
-
-        // just put this so when I test on phone I can see what's happening
-        Swal.fire({
-            title: "DB created!",
-            icon: "success",
-            confirmButtonText: "Great!",
-            confirmButtonColor: "#007700"
-        });
     };
 }
 
@@ -95,7 +86,6 @@ function saveRun(runData)
     // check db exists
     if (!db) 
     {
-        console.error('Database not initialised');
         Swal.fire({
             title: "Error Saving Run",
             text: "Database not initialised. Please reload the page.",
@@ -124,9 +114,7 @@ function saveRun(runData)
     let query = store.add(run);
 
     // handle success case
-    query.onsuccess = function (event) {
-        console.log('Run saved with ID:', event.target.result);
-        
+    query.onsuccess = function (event) {        
         // just put this so when I test on phone I can see what's happening
         Swal.fire({
             title: "Run Saved!",
@@ -139,8 +127,6 @@ function saveRun(runData)
 
     // handle the error case
     query.onerror = function (event) {
-        console.error('Error saving run:', event.target.error);
-        
         // just put this so when I test on phone I can see what's happening
         Swal.fire({
             title: "Error Saving Run",
