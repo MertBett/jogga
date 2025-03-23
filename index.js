@@ -606,12 +606,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 {
                     allPolylines.push([...currentPolylineCoords]);
                 }
-                saveRunToLocalStorage();
+                
+                startButton.classList.add('hidden');
+                pauseButton.classList.add('hidden');
+                continueButton.classList.remove('hidden');
+                finishButton.classList.remove('hidden');
+                historyButton.classList.add('hidden');
+                settingsButton.classList.add('hidden');
             }
-        }
-        else if(document.visibilityState == 'visible')
-        {
-            checkForSavedRun();
         }
     });
 
