@@ -153,9 +153,9 @@ html, body
     max-width: 600px;
     max-height: 90vh;
     border-radius: 8px;
-    overflow: auto;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .modal-header {
@@ -182,7 +182,6 @@ html, body
 
 .modal-body {
     padding: 20px;
-    flex: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -215,7 +214,8 @@ html, body
 }
 
 .detail-map {
-    height: 300px;
+    width: 100%;
+    height: 250px;
     border-radius: 8px;
     overflow: hidden;
 }

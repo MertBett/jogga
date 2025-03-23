@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function initDB() {
         // check for IndexedDB support
         if (!window.indexedDB) {
+            // this should prob just be an error
             console.log("Your browser doesn't support IndexedDB");
             return;
         }
@@ -36,8 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
                 // create an index on the date
                 store.createIndex('date', 'date', { unique: false });
-            
-                console.log('Runs object store created');
             }
         };
 
@@ -49,13 +48,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // handle the success event
         request.onsuccess = (event) => {
             db = event.target.result;
-            console.log('Database opened successfully');
 
             // load the db
             loadRunHistory(db);
-
-            // Add a dummy run for testing
-            addDummyRun(db);
         
             // activate the buttons in the modlas
             setupEventHandlers(db);
@@ -84,14 +79,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
         
-        // Handle any errors
         txn.onerror = (event) => {
-            console.error("Error loading runs:", event.target.error);
-            showErrorMessage("Failed to load run history");
+            Swal.fire({
+                title: 'Error',
+                text: "Failed to load run history",
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#007700'
+            });
         };
     }
     
-    // Setup UI event handlers
+    // make buttons in modal work
     function setupEventHandlers(db) {
         // make close modal button work
         closeModalButton.addEventListener('click', function() {
@@ -111,7 +110,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 cancelButtonColor: '#ee0505',
                 confirmButtonText: 'Yes'
             }).then((result) => {
-                if (result.isConfirmed) {
+                if (result.isConfirmed) 
+                {
                     // delete the run
                     deleteRun(db, currentRunId);
                 }
@@ -127,7 +127,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const request = store.delete(id);
         
         request.onsuccess = (event) => {
-            console.log("Run deleted successfully");
             Swal.fire(
                 'Deleted!',
                 'Your run has been deleted.',
@@ -141,15 +140,21 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         request.onerror = (event) => {
-            console.error("Error deleting run:", event.target.error);
-            showErrorMessage("Failed to delete run");
+            Swal.fire({
+                title: 'Error',
+                text: "Failed to delete run",
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#007700'
+            });
         };
     }
     
     // show runs in db
     function displayRuns(runs) 
     {
-        if (runs.length == 0) {
+        if (runs.length == 0) 
+        {
             // no runs so show the no runs message
             noRunsMessage.classList.remove('hidden');
             runListContainer.classList.add('hidden');
@@ -218,7 +223,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // make the map
         if (!detailMap) 
         {
-            console.log("Creating new map");
             detailMap = L.map('detail-map', { 
                 zoomControl: false,
                 attributionControl: true 
@@ -231,7 +235,6 @@ document.addEventListener('DOMContentLoaded', function() {
         else 
         {
             // reset the map because it already exists
-            console.log("Clearing existing map layers");
             detailMap.eachLayer(function(layer) {
                 if (!(layer instanceof L.TileLayer)) {
                     detailMap.removeLayer(layer);
@@ -239,37 +242,33 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Create a bounds object to track the area covered by all polylines
+        // keep track of the bounds so we can focus the map when its done
         const bounds = L.latLngBounds();
             
-        // Add each polyline segment to the map
+        // add each polyline to the map
         run.polylines.forEach(function(coords) {
-                // Create polyline for this segment
                 const polyline = L.polyline(coords, {
-                    color: 'black',
+                    color: 'blue',
                     weight: 3
                 }).addTo(detailMap);
                 
-                // Extend bounds to include all points in this polyline
+                // add the polyline to the bounds 
                 coords.forEach(function(coord) {
                     bounds.extend(coord);
                 });
         });
             
-        // Use fitBounds to automatically adjust the view
-        detailMap.fitBounds(bounds, {
-            padding: [30, 30]
-        });
-                
-        // map needs to wait before modal loads before displaying properly
-        setTimeout(function() {
+        // resizes the map to fit polylines
+        setTimeout(function() 
+        {
             detailMap.invalidateSize();
-        }, 500);
+            detailMap.fitBounds(bounds);
+        }, 100);
     }
     
-    function calculatePace(durationSeconds, distanceKm) 
+    function calculatePace(durationSeconds, distance) 
     {
-        const paceInSeconds = durationSeconds / distanceKm;
+        const paceInSeconds = durationSeconds / distance;
         return formatDuration(paceInSeconds, true);
     }
     
@@ -277,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatDate(date, includeTime = false) 
     {
         
-        if(includeTime = false)
+        if(includeTime == false)
         {
             var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             return result = date.toLocaleDateString("en-GB", options);
@@ -312,67 +311,4 @@ document.addEventListener('DOMContentLoaded', function() {
             return hours + ":" + minutes + ":" + seconds;
         }
     }
-    
-    function showErrorMessage(message) 
-    {
-        Swal.fire({
-            title: 'Error',
-            text: message,
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#007700'
-        });
-    }
-
-    // Add a dummy run for testing purposes
-function addDummyRun(db) {
-    // Check if we already have runs first
-    const txnCheck = db.transaction('runs', 'readonly');
-    const storeCheck = txnCheck.objectStore('runs');
-    let hasRuns = false;
-    
-    storeCheck.count().onsuccess = function(event) {
-        // Only add dummy run if no runs exist
-        if (event.target.result === 0) {
-            console.log("No runs found. Adding dummy run for testing.");
-            
-            // Create a new transaction for writing
-            const txn = db.transaction('runs', 'readwrite');
-            const store = txn.objectStore('runs');
-            
-            // Create dummy polyline data - a small loop route
-            const dummyPolylines = [
-                [
-                    [51.505, -0.09], // Starting point (example: London area)
-                    [51.506, -0.095],
-                    [51.508, -0.1],
-                    [51.507, -0.105],
-                    [51.505, -0.09]  // Back to start
-                ]
-            ];
-            
-            // Format the run data
-            const dummyRun = {
-                date: new Date(Date.now() - 86400000), // Yesterday
-                duration: 1200, // 20 minutes in seconds
-                distance: 2.5,  // 2.5 km
-                polylines: dummyPolylines
-            };
-            
-            // Add to database
-            const request = store.add(dummyRun);
-            
-            request.onsuccess = function(event) {
-                console.log("Dummy run added with ID:", event.target.result);
-            };
-            
-            request.onerror = function(event) {
-                console.error("Error adding dummy run:", event.target.error);
-            };
-        } else {
-            console.log("Runs already exist. Not adding dummy run.");
-        }
-    };
-}
-       
 });
