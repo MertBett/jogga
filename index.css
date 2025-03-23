@@ -42,7 +42,7 @@ html, body
 .stat-label 
 {
     font-size: 16px;
-    color: #444;
+    color: #000000;
     margin-bottom: 5px;
     font-weight: 500;
 }
@@ -51,7 +51,7 @@ html, body
 {
     font-size: 20px;
     font-weight: 600;
-    color: #333;
+    color: #000000;
 }
 
 .bottom-nav 
@@ -70,7 +70,7 @@ html, body
 
 .nav-item 
 {
-    color: #444;
+    color: #000000;
     font-size: 16px;
     text-align: center;
     display: flex;

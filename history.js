@@ -291,7 +291,9 @@ document.addEventListener('DOMContentLoaded', function() {
     {
         // https://www.programmingbasic.com/convert-seconds-to-minutes-and-seconds-javascript
         // for mins and secs (pace)
-        if (asPace) {
+        if (asPace) 
+        {
+            totalSeconds = Math.round(totalSeconds);
             const min = Math.floor(totalSeconds/60);
             const secs = totalSeconds % 60;
             return min.toString().padStart(2, '0')+":"+secs.toString().padStart(2, '0');

@@ -485,8 +485,9 @@ document.addEventListener("DOMContentLoaded", function () {
         clearInterval(timerVar);
         isRunning = false;
         
-        // save run if its not a misclick basically
-        if (totalDistance > 0 && totalSeconds > 0 && allPolylines.length > 0) {
+        // save run
+        // maybe make a pop up ask are you sure then confirm then save rnu
+        if (totalDistance > 0) {
             saveRunToDatabase();
         }
         
@@ -558,4 +559,103 @@ document.addEventListener("DOMContentLoaded", function () {
             confirmButtonColor: "#007700"
         });
     });
+
+    // save run data in local storage 
+    function saveRunToLocalStorage() 
+    {
+        // only save if run is happening
+        if ((isRunning || (continueButton.classList.contains('hidden') == false))) 
+        {
+            // save the current polyline if ongoing
+            if (isRunning && currentPolylineCoords.length > 0) 
+            {
+                allPolylines.push([...currentPolylineCoords]);
+            }
+                
+            const runData = {
+                totalSeconds: totalSeconds,
+                totalDistance: totalDistance,
+                allPolylines: allPolylines
+                };
+            
+            localStorage.setItem('joggaRunData', JSON.stringify(runData));
+        }
+    }
+
+    // what happens when app is minimised 
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState == 'hidden') 
+        {
+            if (isRunning) 
+            {
+                // if during a run then pause the timer
+                clearInterval(timerVar);
+            }
+            
+            // save the run
+            saveRunToLocalStorage();
+        }
+    });
+
+    // what happens when the app is closed
+    window.addEventListener('beforeunload', function() {
+        // save the run (will obv only happen if a run is happening)
+        saveRunToLocalStorage();
+    });
+
+    // check local storage for a saved run
+    function checkForSavedRun() 
+    {
+        // get the run (null if none)
+        const savedRunData = localStorage.getItem('joggaRunData');
+    
+        // if exists then load it
+        if (savedRunData) 
+        {
+            const runData = JSON.parse(savedRunData);
+            
+            // restore the session
+            restoreRun(runData);
+            
+            // delete the run from local storage because its been loaded
+            localStorage.removeItem('joggaRunData');
+        }
+    }
+
+    // restore a run from local storage
+    function restoreRun(runData) 
+    {
+        totalSeconds = runData.totalSeconds;
+        totalDistance = runData.totalDistance;
+        allPolylines = runData.allPolylines;
+    
+        // redraw all the lines
+        polylineGroup.clearLayers();
+        allPolylines.forEach(polylineCoords => {
+            L.polyline(polylineCoords, {color: 'black'}).addTo(polylineGroup);
+        });
+    
+        // display all the run info
+        document.getElementById("distance").innerHTML = totalDistance.toFixed(2) + "km";
+
+        let hour = Math.floor(totalSeconds / 3600);
+        let minute = Math.floor((totalSeconds - hour * 3600) / 60);
+        let seconds = totalSeconds - (hour * 3600 + minute * 60);
+        
+        if (hour < 10) hour = "0" + hour;
+        if (minute < 10) minute = "0" + minute;
+        if (seconds < 10) seconds = "0" + seconds;
+        
+        document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
+    
+        // set UI to paused
+        startButton.classList.add('hidden');
+        pauseButton.classList.add('hidden');
+        continueButton.classList.remove('hidden');
+        finishButton.classList.remove('hidden');
+        historyButton.classList.add('hidden');
+        settingsButton.classList.add('hidden');
+    }
+
+    checkForSavedRun();
 });
