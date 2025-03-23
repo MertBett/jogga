@@ -198,7 +198,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!permissionGranted) 
         {
             permissionGranted = true;
-            startButton.classList.remove('hidden');
+
+            // display start button only if we are not restoring a locally saved run
+            if (continueButton.classList.contains('hidden')) 
+            {
+                startButton.classList.remove('hidden');
+            }
         }
 
         let rawLat = position.coords.latitude;
@@ -490,6 +495,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (totalDistance > 0) {
             saveRunToDatabase();
         }
+
+        // having an issue where saved run is reloaded for some reason so just putting deletes places
+        localStorage.removeItem('joggaRunData');
         
         // reset everything
         previousLat = null;
@@ -582,18 +590,28 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // what happens when app is minimised 
+    // save the run when app is minimised and reload when maximised 
     document.addEventListener('visibilitychange', function() {
+        // only do this when minimising 
         if (document.visibilityState == 'hidden') 
         {
+            // if it was during a run then pause everything and save it
             if (isRunning) 
             {
-                // if during a run then pause the timer
                 clearInterval(timerVar);
+                isRunning = false;
+                document.getElementById("pace").innerHTML = "--:--/km";
+                paceHistory = [];
+                if (currentPolylineCoords.length > 0) 
+                {
+                    allPolylines.push([...currentPolylineCoords]);
+                }
+                saveRunToLocalStorage();
             }
-            
-            // save the run
-            saveRunToLocalStorage();
+        }
+        else if(document.visibilityState == 'visible')
+        {
+            checkForSavedRun();
         }
     });
 
@@ -655,6 +673,8 @@ document.addEventListener("DOMContentLoaded", function () {
         finishButton.classList.remove('hidden');
         historyButton.classList.add('hidden');
         settingsButton.classList.add('hidden');
+
+        localStorage.removeItem('joggaRunData');
     }
 
     checkForSavedRun();
