@@ -495,9 +495,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (totalDistance > 0) {
             saveRunToDatabase();
         }
-
-        // having an issue where saved run is reloaded for some reason so just putting deletes places
-        localStorage.removeItem('joggaRunData');
         
         // reset everything
         previousLat = null;
@@ -525,6 +522,10 @@ document.addEventListener("DOMContentLoaded", function () {
     {
         timerVar = setInterval(countTimer, 1000);
         isRunning = true;
+
+        previousLat = null;
+        previousLng = null;
+        previousTime = null;
         
         // new polyline
         currentPolyline = L.polyline([], {color: 'black'}).addTo(polylineGroup);
@@ -636,9 +637,16 @@ document.addEventListener("DOMContentLoaded", function () {
             
             // restore the session
             restoreRun(runData);
-            
-            // delete the run from local storage because its been loaded
-            localStorage.removeItem('joggaRunData');
+        }
+        else
+        {
+            Swal.fire({
+                title: "NO RUN",
+                text: "NO SAVED RUN",
+                icon: "warning",
+                confirmButtonText: "Okay",
+                confirmButtonColor: "#007700"
+            });
         }
     }
 
