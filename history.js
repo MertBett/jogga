@@ -48,7 +48,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // handle the success event
         request.onsuccess = (event) => {
             db = event.target.result;
-            
+
+            // Add a dummy run for testing
+            addDummyRun(db);
+
             // load the db
             loadRunHistory(db);
         
@@ -315,4 +318,55 @@ document.addEventListener('DOMContentLoaded', function() {
             return hours + ":" + minutes + ":" + seconds;
         }
     }
+
+    // Add a dummy run for testing purposes
+function addDummyRun(db) {
+    // Check if we already have runs first
+    const txnCheck = db.transaction('runs', 'readonly');
+    const storeCheck = txnCheck.objectStore('runs');
+    let hasRuns = false;
+
+    storeCheck.count().onsuccess = function(event) {
+        // Only add dummy run if no runs exist
+        if (event.target.result === 0) {
+            console.log("No runs found. Adding dummy run for testing.");
+
+            // Create a new transaction for writing
+            const txn = db.transaction('runs', 'readwrite');
+            const store = txn.objectStore('runs');
+
+            // Create dummy polyline data - a small loop route
+            const dummyPolylines = [
+                [
+                    [51.505, -0.09], // Starting point (example: London area)
+                    [51.506, -0.095],
+                    [51.508, -0.1],
+                    [51.507, -0.105],
+                    [51.505, -0.09]  // Back to start
+                ]
+            ];
+
+            // Format the run data
+            const dummyRun = {
+                date: new Date(Date.now() - 86400000), // Yesterday
+                duration: 1200, // 20 minutes in seconds
+                distance: 2.5,  // 2.5 km
+                polylines: dummyPolylines
+            };
+
+            // Add to database
+            const request = store.add(dummyRun);
+
+            request.onsuccess = function(event) {
+                console.log("Dummy run added with ID:", event.target.result);
+            };
+
+            request.onerror = function(event) {
+                console.error("Error adding dummy run:", event.target.error);
+            };
+        } else {
+            console.log("Runs already exist. Not adding dummy run.");
+        }
+    };
+}
 });
