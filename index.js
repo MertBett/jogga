@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initDB();
 
     const myIcon = L.divIcon({
-        html: '<i class="fas fa-circle" style="color: blue; font-size: 20px;"></i>',
+        html: '<i class="fas fa-circle" style="color: blue; font-size: 20px;" aria-label="Marker showing position"></i>',
         className: 'marker',
         iconSize: [20, 20],
         iconAnchor: [10, 10],
