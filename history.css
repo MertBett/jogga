@@ -96,7 +96,7 @@ html, body
 }
 
 .run-date {
-    font-size: 14px;
+    font-size: 18px;
     color: black;
     margin-bottom: 5px;
 }
@@ -108,13 +108,13 @@ html, body
 }
 
 .run-duration {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
     color: black;
 }
 
 .run-pace {
-    font-size: 14px;
+    font-size: 18px;
     color: black;
 }
 
