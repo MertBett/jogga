@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // handle the success event
         request.onsuccess = (event) => {
             db = event.target.result;
-
+            
             // load the db
             loadRunHistory(db);
         
