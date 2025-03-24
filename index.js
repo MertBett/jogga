@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initDB();
 
     const myIcon = L.divIcon({
-        html: '<i class="fas fa-circle" style="color: gold; font-size: 20px;"></i>',
+        html: '<i class="fas fa-circle" style="color: blue; font-size: 20px;"></i>',
         className: 'marker',
         iconSize: [20, 20],
         iconAnchor: [10, 10],
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
         {
             currentPolyline.addLatLng([newLat, newLng]);
             
-            // Store coordinate for database storage
+            // add coords to polyline memory so it can be saved later
             currentPolylineCoords.push([newLat, newLng]);
 
             if(previousLat != null && previousLng != null)
@@ -459,7 +459,7 @@ document.addEventListener("DOMContentLoaded", function () {
         isRunning = true;
         
         // create polyline and add to map
-        currentPolyline = L.polyline([], {color: 'black'}).addTo(polylineGroup);
+        currentPolyline = L.polyline([], {color: 'blue'}).addTo(polylineGroup);
         currentPolylineCoords = [];
         
         startButton.classList.add('hidden');
@@ -530,7 +530,7 @@ document.addEventListener("DOMContentLoaded", function () {
         previousTime = null;
         
         // new polyline
-        currentPolyline = L.polyline([], {color: 'black'}).addTo(polylineGroup);
+        currentPolyline = L.polyline([], {color: 'blue'}).addTo(polylineGroup);
         currentPolylineCoords = [];
         
         finishButton.classList.add('hidden');
@@ -647,7 +647,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // redraw all the lines
         polylineGroup.clearLayers();
         allPolylines.forEach(polylineCoords => {
-            L.polyline(polylineCoords, {color: 'black'}).addTo(polylineGroup);
+            L.polyline(polylineCoords, {color: 'blue'}).addTo(polylineGroup);
         });
     
         // display all the run info
