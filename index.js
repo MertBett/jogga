@@ -593,7 +593,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // save the run when app is minimised and reload when maximised 
+    // save the run when app is minimised or closed
     document.addEventListener('visibilitychange', function() {
         // only do this when minimising 
         if (document.visibilityState == 'hidden') 
@@ -621,12 +621,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // what happens when the app is closed
-    window.addEventListener('beforeunload', function() {
-        // save the run (will obv only happen if a run is happening)
-        saveRunToLocalStorage();
-    });
-
     // check local storage for a saved run
     function checkForSavedRun() 
     {
@@ -640,16 +634,6 @@ document.addEventListener("DOMContentLoaded", function () {
             
             // restore the session
             restoreRun(runData);
-        }
-        else
-        {
-            Swal.fire({
-                title: "NO RUN",
-                text: "NO SAVED RUN",
-                icon: "warning",
-                confirmButtonText: "Okay",
-                confirmButtonColor: "#007700"
-            });
         }
     }
 
