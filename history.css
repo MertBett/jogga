@@ -5,7 +5,6 @@ html, body
     height: 100%;
     width: 100%;
     font-family: sans-serif;
-    overflow-y: auto;
 }
 
 .bottom-nav 
@@ -62,8 +61,8 @@ html, body
 .history-content {
     margin-top: 90px;
     padding: 10px;
-    padding-bottom: 90px;
     overflow-y: auto;
+    margin-bottom: 80px;
 }
 
 .run-list {
@@ -73,7 +72,7 @@ html, body
 }
 
 .run-card {
-    background-color: white;
+    background-color: grey;
     border-radius: 8px;
     padding: 15px;
     display: flex;
@@ -148,7 +147,7 @@ html, body
 }
 
 .modal-content {
-    background: white;
+    background: grey;
     width: 90%;
     max-width: 600px;
     max-height: 90vh;

@@ -262,7 +262,9 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() 
         {
             detailMap.invalidateSize();
-            detailMap.fitBounds(bounds);
+            detailMap.fitBounds(bounds, {
+                padding: [15, 15]
+            });
         }, 100);
     }
     
