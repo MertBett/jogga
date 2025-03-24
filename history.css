@@ -72,7 +72,7 @@ html, body
 }
 
 .run-card {
-    background-color: grey;
+    background-color: lightgray;
     border-radius: 8px;
     padding: 15px;
     display: flex;
@@ -147,7 +147,7 @@ html, body
 }
 
 .modal-content {
-    background: grey;
+    background: lightgray;
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
