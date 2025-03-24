@@ -593,6 +593,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // save the run when app is minimised and reload when maximised 
     document.addEventListener('visibilitychange', function() {
+        saveRunToLocalStorage();
         // only do this when minimising 
         if (document.visibilityState == 'hidden') 
         {
