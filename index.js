@@ -516,6 +516,8 @@ document.addEventListener("DOMContentLoaded", function () {
         startButton.classList.remove('hidden');
         historyButton.classList.remove('hidden');
         settingsButton.classList.remove('hidden');
+
+        localStorage.removeItem('joggaRunData');
     });
 
     continueButton.addEventListener('click', function() 
@@ -596,6 +598,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // only do this when minimising 
         if (document.visibilityState == 'hidden') 
         {
+            saveRunToLocalStorage();
             // if it was during a run then pause everything and save it
             if (isRunning) 
             {
